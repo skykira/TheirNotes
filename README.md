@@ -12,7 +12,7 @@
 
 - [`BiConsumer` 为什么可以引用仅有一个参数的方法](https://stackoverflow.com/questions/58046693/biconsumer-and-method-reference-of-one-parameter)
 
-## JVM
+# JVM
 
 - [图说 Java 字节码指令](https://segmentfault.com/a/1190000008606277)
 
