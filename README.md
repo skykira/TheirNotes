@@ -4,6 +4,8 @@
 
 - [`toArray()` 与 `toArray(new String[0])`](https://stackoverflow.com/questions/18136437/whats-the-use-of-new-string0-in-toarraynew-string0)
 
+- [`ThreadLocalMap` 概览](https://www.cnblogs.com/xzwblog/p/7227509.html)
+
 # Java 并发
 
 - [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
@@ -22,6 +24,8 @@
 
     因此，重量级锁可以降级为轻量级锁。
 
+- [`ReentrantReadWriteLock` 保证 `readHolds` 的可见性](https://stackoverflow.com/questions/1675268/java-instance-variable-visibility-threadlocal)
+
 # Java 安全
 
 - [如何理解恶意代码执行 `AccessController.doPrivileged()`](https://stackoverflow.com/questions/37962070/malicious-code-running-accesscontroller-doprivileged)
@@ -39,6 +43,8 @@
 - [`Thread-Local Handshakes` 优化安全点STW](https://openjdk.java.net/jeps/312)
 
     对象的偏向锁撤销操作也可以无需程序运行到 `SafePoint`
+
+- [Java启动参数 `javaagent` 的使用](https://www.cnblogs.com/rickiyang/p/11368932.html)
 
 
 
