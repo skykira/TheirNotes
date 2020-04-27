@@ -6,6 +6,8 @@
 
 - [`ThreadLocalMap` 概览](https://www.cnblogs.com/xzwblog/p/7227509.html)
 
+- [反射修改 `static final` 的成员变量](https://www.zhihu.com/question/47054187)
+
 # Java 并发
 
 - [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
