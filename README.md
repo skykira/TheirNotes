@@ -48,5 +48,16 @@
 
 - [Java启动参数 `javaagent` 的使用](https://www.cnblogs.com/rickiyang/p/11368932.html)
 
+# 分布式
 
+## Raft
 
+- [客户端只读请求的处理](https://zhuanlan.zhihu.com/p/36592467)
+
+# DateBase
+
+- [MySQL LEFT JOIN/ INNER JOIN/RIGHT JOIN 执行过程](https://learnku.com/articles/27701)
+
+- [MySQL 多表 Join (表连接) 和 Where 间的执行顺序：`nested loop join` 机制](https://blog.csdn.net/qq_27529917/article/details/78447882)
+
+    每 Join 一次后执行 where 过滤结果集，交叉执行。
