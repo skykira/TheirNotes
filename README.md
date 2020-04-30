@@ -8,6 +8,8 @@
 
 - [反射修改 `static final` 的成员变量](https://www.zhihu.com/question/47054187)
 
+- [内部类中的隐藏变量 `this$0` 指向外部类](https://stackoverflow.com/questions/28462849/what-does-it-mean-if-a-variable-has-the-name-this0-in-intellij-idea-while-deb/28462949)
+
 # Java 并发
 
 - [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
