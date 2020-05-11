@@ -6,9 +6,15 @@
 
 - [`ThreadLocalMap` 概览](https://www.cnblogs.com/xzwblog/p/7227509.html)
 
+    `ThreadLocal` 是 `Thread` 操纵自己的 `ThreadLocalMap` 的工具。
+
 - [反射修改 `static final` 的成员变量](https://www.zhihu.com/question/47054187)
 
-- [内部类中的隐藏变量 `this$0` 指向外部类](https://stackoverflow.com/questions/28462849/what-does-it-mean-if-a-variable-has-the-name-this0-in-intellij-idea-while-deb/28462949)
+- [非静态内部类中的隐藏变量 `this$0` 指向外部类](https://stackoverflow.com/questions/28462849/what-does-it-mean-if-a-variable-has-the-name-this0-in-intellij-idea-while-deb/28462949)
+
+- [反射方法 `getDeclaredField()` 与 `getField()` 的区别](https://docs.oracle.com/javase/tutorial/reflect/class/classMembers.html)
+
+    父类属性与私有属性不可兼得。
 
 # Java 并发
 
@@ -56,6 +62,10 @@
 
 - [客户端只读请求的处理](https://zhuanlan.zhihu.com/p/36592467)
 
+## BFT
+
+- [PBFT 算法各阶段消息发送数量证明](https://zhuanlan.zhihu.com/p/53897982)
+
 # DateBase
 
 - [MySQL LEFT JOIN/ INNER JOIN/RIGHT JOIN 执行过程](https://learnku.com/articles/27701)
@@ -63,3 +73,9 @@
 - [MySQL 多表 Join (表连接) 和 Where 间的执行顺序：`nested loop join` 机制](https://blog.csdn.net/qq_27529917/article/details/78447882)
 
     每 Join 一次后执行 where 过滤结果集，交叉执行。
+
+- [利用 `sum()` 统计列中某个值的数目](https://blog.csdn.net/lavorange/article/details/25004181)
+
+- [MySQL 组内排序](https://www.jianshu.com/p/717c4bdad462)
+
+- [MVCC 是否解决了幻读](https://segmentfault.com/a/1190000020680168)
