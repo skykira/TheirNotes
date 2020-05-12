@@ -56,6 +56,17 @@
 
 - [Java启动参数 `javaagent` 的使用](https://www.cnblogs.com/rickiyang/p/11368932.html)
 
+- [JVM 创建对象时的快速分配与慢速分配](https://umumble.com/blogs/java/how-does-jvm-allocate-objects%3F/)
+
+    JVM 创建对象的过程：
+    
+    1. 尝试在TLAB中分配对象。
+    2. 如果TLAB中没有空间，则可以使用原子指令从eden分配新的TLAB或直接在eden中创建对象。
+    3. 如果伊甸园中没有地方，那么将进行垃圾收集。
+    4. 如果之后没有足够的空间，则尝试在旧一代中进行分配。
+    5. 如果它不起作用，那么报 OOM。
+    6. 对象设置标志头，然后调用构造函数。
+
 # 分布式
 
 ## Raft
