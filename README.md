@@ -60,12 +60,44 @@
 
     JVM 创建对象的过程：
     
-    1. 尝试在TLAB中分配对象。
-    2. 如果TLAB中没有空间，则可以使用原子指令从eden分配新的TLAB或直接在eden中创建对象。
-    3. 如果伊甸园中没有地方，那么将进行垃圾收集。
-    4. 如果之后没有足够的空间，则尝试在旧一代中进行分配。
-    5. 如果它不起作用，那么报 OOM。
-    6. 对象设置标志头，然后调用构造函数。
+    1. 尝试在TLAB中分配对象
+   
+    2. 如果TLAB中没有空间，则可以使用原子指令从eden分配新的TLAB或直接在eden中创建对象
+   
+    3. 如果伊甸园中没有地方，那么将进行垃圾收集
+   
+    4. 如果之后没有足够的空间，则尝试在旧一代中进行分配
+   
+    5. 如果它不起作用，那么报 OOM
+   
+    6. 对象设置标志头，然后调用构造函数
+
+- [缓存行伪共享 (False Sharing)](http://ifeve.com/falsesharing/)
+
+- [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
+
+- [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
+
+    - [G1 垃圾回收算法总览](https://www.jianshu.com/p/a3e6a9de7a5d)
+
+    - [G1 SATB和 Incremental Update 算法的区别](https://www.jianshu.com/p/8d37a07277e0)
+
+        SATB 认为标记开始时，所有活着的对象在之后并发标记时也是存活的，因此当白对象断开某个引用时，将该引用压入遍历堆栈，也就是将该白对象变为灰对象。
+
+        Incremental Update 在某个黑对象又引用了某个白对象时，会将该黑对象置灰，因此该算法在完成并发 marking 后 需要重新扫描根集合，重新将灰置黑。
+
+    - [PrevBitmap 和 NextBitmap 的作用](https://www.jianshu.com/p/aef0f4765098)
+
+        Region 的 prevTAMS 和 nextTAMS 用于记录并发标记过程中，新分配的对象，同时存储个快照。write barrier 用于记录已标记的对象引用发生更改的情况。
+
+    - [G1-Card Table 和 RSet 的关系](https://blog.csdn.net/luzhensmart/article/details/106052574)
+
+- [ZGC 的特点](https://mp.weixin.qq.com/s/KUCs_BJUNfMMCO1T3_WAjw)
+
+
+## 调优
+
+- [jmap 指令慎用](https://blog.csdn.net/seeJavaDocs/article/details/53643227)
 
 # 分布式
 
