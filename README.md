@@ -1,19 +1,19 @@
 <!-- TOC -->
 
-- [Java基础](#java%e5%9f%ba%e7%a1%80)
-- [Java 并发](#java-%e5%b9%b6%e5%8f%91)
-- [Java 安全](#java-%e5%ae%89%e5%85%a8)
-- [函数式编程](#%e5%87%bd%e6%95%b0%e5%bc%8f%e7%bc%96%e7%a8%8b)
+- [Java 基础](#java-基础)
+- [Java 并发](#java-并发)
+- [Java 安全](#java-安全)
+- [函数式编程](#函数式编程)
 - [JVM](#jvm)
-  - [调优](#%e8%b0%83%e4%bc%98)
-- [分布式](#%e5%88%86%e5%b8%83%e5%bc%8f)
+  - [调优](#调优)
+- [分布式](#分布式)
   - [Raft](#raft)
   - [BFT](#bft)
 - [DateBase](#datebase)
 
 <!-- /TOC -->
 
-# Java基础
+# Java 基础
 
 - [`Class.this` 与 `this` 的区别](https://stackoverflow.com/questions/5666134/what-is-the-difference-between-class-this-and-this-in-java)
 
@@ -30,6 +30,10 @@
 - [反射方法 `getDeclaredField()` 与 `getField()` 的区别](https://docs.oracle.com/javase/tutorial/reflect/class/classMembers.html)
 
     父类属性与私有属性不可兼得。
+
+- [反射加载自定义的 `java.lang.System` 类](https://zhuanlan.zhihu.com/p/77366251)
+
+- [Java lambda 表达式内变量须为 final 原因](https://www.zhihu.com/question/28190927/answer/39786939)
 
 # Java 并发
 
@@ -54,6 +58,8 @@
 # Java 安全
 
 - [如何理解恶意代码执行 `AccessController.doPrivileged()`](https://stackoverflow.com/questions/37962070/malicious-code-running-accesscontroller-doprivileged)
+
+- [java沙箱绕过](https://www.anquanke.com/post/id/151398)
 
 # 函数式编程
 
