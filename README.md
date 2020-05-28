@@ -10,6 +10,7 @@
   - [Raft](#raft)
   - [BFT](#bft)
 - [DateBase](#datebase)
+- [编程基础](#编程基础)
 
 <!-- /TOC -->
 
@@ -47,7 +48,8 @@
 
 - [Java中的偏向锁、轻量级锁、重量级锁解析](https://blog.csdn.net/lengxiao1993/article/details/81568130?depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1&utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1)
 
-- [Java中的锁降级✨✨](http://openjdk.java.net/jeps/8183909)
+- [Java中的锁降级](https://www.zhihu.com/question/63859501)
+  - [Java中的锁级降提案✨✨](http://openjdk.java.net/jeps/8183909)
 
     该优化提案显示，目前，实现重量级锁的 `monitor` 对象可以在STW时被清除，清除的是那些只有 `VM Thread`会去访问它们的 `monitor` 对象（也就是，不再使用的 `monitor` 对象）。
 
@@ -143,3 +145,13 @@
 - [MySQL 组内排序](https://www.jianshu.com/p/717c4bdad462)
 
 - [MVCC 是否解决了幻读](https://segmentfault.com/a/1190000020680168)
+
+# 编程基础
+
+- [正则表达式的环视](https://blog.csdn.net/lxcnn/article/details/4304754)
+
+    > `str.replaceFirst("(?<=.{5}).+", "...")`
+    >
+    > 保留 `str` 的前五位字符，其余字符用 `...` 代替
+    
+    - [正则表达式参考文档](http://notes.tanchuanqi.com/tools/regex.html)
