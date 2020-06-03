@@ -39,6 +39,8 @@
 
 - [理解 Java 的线程中断](https://blog.csdn.net/canot/article/details/51087772)
 
+- [JDK 动态代理]()
+
 # Java 并发
 
 - [Java 线程状态转换图](http://mcace.me/java%E5%B9%B6%E5%8F%91/2018/08/24/java-thread-states.html)
@@ -125,6 +127,8 @@
 - [理解字节码增强工具包 Instrumentation ](https://www.throwable.club/2019/06/29/java-understand-instrument-first/)
 
     包括 `premain` 和 `agentmain` 的使用
+
+- [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
 
 
 ## 调优
