@@ -10,6 +10,7 @@
   - [Raft](#raft)
   - [BFT](#bft)
 - [DateBase](#datebase)
+- [Spring](#spring)
 - [编程基础](#编程基础)
 
 <!-- /TOC -->
@@ -36,7 +37,11 @@
 
 - [Java lambda 表达式内变量须为 final 原因](https://www.zhihu.com/question/28190927/answer/39786939)
 
+- [理解 Java 的线程中断](https://blog.csdn.net/canot/article/details/51087772)
+
 # Java 并发
+
+- [Java 线程状态转换图](http://mcace.me/java%E5%B9%B6%E5%8F%91/2018/08/24/java-thread-states.html)
 
 - [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
 
@@ -117,6 +122,10 @@
 
 - [ZGC 的特点](https://mp.weixin.qq.com/s/KUCs_BJUNfMMCO1T3_WAjw)
 
+- [理解字节码增强工具包 Instrumentation ](https://www.throwable.club/2019/06/29/java-understand-instrument-first/)
+
+    包括 `premain` 和 `agentmain` 的使用
+
 
 ## 调优
 
@@ -145,6 +154,22 @@
 - [MySQL 组内排序](https://www.jianshu.com/p/717c4bdad462)
 
 - [MVCC 是否解决了幻读](https://segmentfault.com/a/1190000020680168)
+
+# Spring
+
+- [GenericTypeResolver.resolveTypeArguments(Class<?> clazz, Class<?> genericIfc)](https://stackoverflow.com/questions/34271764/generictyperesolver-resolvetypearguments-returns-null)获取继承泛型类的子类的泛型类型
+
+    对于 `AsyncConfigurationSelector` 类
+    ```java
+    public class AsyncConfigurationSelector extends AdviceModeImportSelector<EnableAsync>{
+        ...
+        public void someMethod(){
+            Class<?> annType = GenericTypeResolver.resolveTypeArgument(this.getClass(), AdviceModeImportSelector.class);
+            //annType 类型便是继承的父类的泛型类型
+        }
+    }
+    ```
+    
 
 # 编程基础
 
