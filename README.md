@@ -5,6 +5,7 @@
 - [Java 安全](#java-安全)
 - [函数式编程](#函数式编程)
 - [JVM](#jvm)
+  - [字节码操作](#字节码操作)
   - [调优](#调优)
 - [分布式](#分布式)
   - [Raft](#raft)
@@ -130,11 +131,15 @@
 
 - [ZGC 的特点](https://mp.weixin.qq.com/s/KUCs_BJUNfMMCO1T3_WAjw)
 
+- [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
+
+## 字节码操作
+
 - [理解字节码增强工具包 Instrumentation ](https://www.throwable.club/2019/06/29/java-understand-instrument-first/)
 
     包括 `premain` 和 `agentmain` 的使用
 
-- [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
+- [Java 字节码增强技术](https://tech.meituan.com/2019/09/05/java-bytecode-enhancement.html)
 
 
 ## 调优
