@@ -12,6 +12,7 @@
   - [BFT](#bft)
 - [DateBase](#datebase)
 - [Spring](#spring)
+- [Tomcat](#tomcat)
 - [编程基础](#编程基础)
 
 <!-- /TOC -->
@@ -40,13 +41,19 @@
 
 - [理解 Java 的线程中断](https://blog.csdn.net/canot/article/details/51087772)
 
-- [JDK 动态代理](https://github.com/skykira/TheirNotes/tree/master/SourceCode/JDK%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
+- [Java 动态代理](https://github.com/skykira/TheirNotes/tree/master/SourceCode/JDK%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
 
     - [JDK 自带动态代理源码分析](https://blog.csdn.net/weixin_43217817/article/details/102268504)
 
     > JDK 操作字节码生成所需要的代理类 `Class`，该代理类继承了 `Proxy` 并实现了我们的接口。Proxy 类实例提供了保存 `InvocationHandler` 自定义逻辑的功能。
     >
     > 代理类中所有的方法（包括类似 `toString()`）都通过我们自定义的 `InvocationHandler` 的 `invoke` 方法来实现，因此单个代理类的方法会被加入同样的逻辑。
+
+    - [CGLib 动态代理](https://dannashen.github.io/2019/05/09/Cglib%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/)
+
+        拦截器中对被拦截方法的调用通过 `proxy.invokeSuper(obj, args);` 完成，相当于子类直接调用父类，比 `invokeHandler` 的反射调用快些，量大的话。
+
+- [检查型异常与非检查型异常](https://blog.csdn.net/u013630349/article/details/50850880)
 
 # Java 并发
 
@@ -131,6 +138,16 @@
 
 - [ZGC 的特点](https://mp.weixin.qq.com/s/KUCs_BJUNfMMCO1T3_WAjw)
 
+- [Full GC 时新生代的垃圾收集方式](https://www.zhihu.com/question/62604570/answer/201129934)
+
+    CMS 之前的垃圾收集器并不能单独收集老年代，Full GC 对整个堆使用 `MSC(Mark-Sweep-Compact)` 算法。
+
+- [Major GC 和 Full GC 的区别](https://www.zhihu.com/question/41922036/answer/93079526)
+
+- [ParallelScavenge 的 fullGC](https://www.zhihu.com/question/48780091/answer/113063216)
+
+- [GCLocker-initiated young GC 多余发生](https://www.jianshu.com/p/ecc57a81f73c)
+
 - [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
 
 ## 字节码操作
@@ -170,6 +187,8 @@
 
 - [MVCC 是否解决了幻读](https://segmentfault.com/a/1190000020680168)
 
+- [数据库事务中的一致性](https://www.zhihu.com/question/31346392)
+
 # Spring
 
 - [GenericTypeResolver.resolveTypeArguments(Class<?> clazz, Class<?> genericIfc)](https://stackoverflow.com/questions/34271764/generictyperesolver-resolvetypearguments-returns-null)获取继承泛型类的子类的泛型类型
@@ -184,7 +203,12 @@
         }
     }
     ```
-    
+
+- [`$$` 与 `<generated>` 代表的含义](https://stackoverflow.com/questions/33605246/what-does-and-generated-means-in-java-stacktrace)
+
+# Tomcat
+
+- [Tomcat 处理请求过程源码解析](https://blog.csdn.net/leileibest_437147623/article/details/85287568?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
 # 编程基础
 
