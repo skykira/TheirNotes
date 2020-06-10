@@ -204,6 +204,25 @@
     }
     ```
 
+- [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/8SpwGLMn_ewmT7h6Cn88_Q)
+
+    由 `ConfigurationClassPostProcessor` 完成对配置类的代理操作
+
+    - `postProcessBeanFactory` 方法
+
+        1. 列出 `beanFactory` 中被 `@Configuration` 注释的 `beanDefinition`
+        2. 将上面每一个 `beanDefinition` 的 `beanClass` 替换为基于 CGlib 的代理类
+        3. 代理类自带两个拦截器
+           -  `new BeanMethodInterceptor()`
+                
+                代理 `beanMethod` 方法，控制 bean 的创建或获取。只有第一次调用调用原方法，手续从 `beanFactory` 中获取 `bean`
+
+           -  `new BeanFactoryAwareMethodInterceptor()`
+
+                为代理类注入 `beanFactory` 属性
+
+    
+
 - [`$$` 与 `<generated>` 代表的含义](https://stackoverflow.com/questions/33605246/what-does-and-generated-means-in-java-stacktrace)
 
 # Tomcat
