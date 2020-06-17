@@ -12,6 +12,7 @@
   - [BFT](#bft)
 - [DateBase](#datebase)
 - [Spring](#spring)
+  - [源码解析](#源码解析)
 - [Tomcat](#tomcat)
 - [编程基础](#编程基础)
 
@@ -204,6 +205,10 @@
     }
     ```
 
+- [`$$` 与 `<generated>` 代表的含义](https://stackoverflow.com/questions/33605246/what-does-and-generated-means-in-java-stacktrace)
+
+## 源码解析
+
 - [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/8SpwGLMn_ewmT7h6Cn88_Q)
 
     由 `ConfigurationClassPostProcessor` 完成对配置类的代理操作
@@ -221,9 +226,28 @@
 
                 为代理类注入 `beanFactory` 属性
 
+- [Bean 创建过程源码解析](https://segmentfault.com/a/1190000022309143#item-3-3)
+
+  - createBean 中的扩展点
+
+    1. 执行 bean 实例化前置处理器, `InstantiationAwareBeanPostProcessor` 的 `postProcessBeforeInstantiation()` 方法
+   
+    2. bean 实例化
+    3. `MergedBeanDefinitionPostProcessor` 的 `postProcessMergedBeanDefinition()` 方法
+    4. 执行 bean 实例化后置处理器, `InstantiationAwareBeanPostProcessor` 的 `postProcessAfterInstantiation()` 方法
+    5. 属性值注入前，进行处理`InstantiationAwareBeanPostProcessor` 的 `postProcessPropertyValues()` 方法
+    6. 应用属性值，解析属性值中的 bean 引用, 未加载的去加载
+    7. 调用 bean 前置处理器, `BeanPostProcessor` 的 `postProcessBeforeInitialization()`
+        - 此时会执行 `@PostConstruct`
+    8. bean 初始化，若是 InitializingBean, 调用 `afterPropertiesSet()`
+    9.  调用自定义 `init-method`
+    10. 调用 bean 后置处理器, `BeanPostProcessor` 的 `postProcessAfterInitialization()`
+        - AOP 可在此时返回新的 bean 实例
+    11. 调用 `DestructionAwareBeanPostProcessor` 的 `requiresDestruction` 方法, 判断时候需要注册 bean 销毁逻辑
+
     
 
-- [`$$` 与 `<generated>` 代表的含义](https://stackoverflow.com/questions/33605246/what-does-and-generated-means-in-java-stacktrace)
+- [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://segmentfault.com/a/1190000022425759)
 
 # Tomcat
 
