@@ -13,6 +13,8 @@
 - [DateBase](#datebase)
 - [Spring](#spring)
   - [源码解析](#源码解析)
+  - [关键组件](#关键组件)
+    - [`PostProcessor` bean 后置处理器](#postprocessor-bean-后置处理器)
 - [Tomcat](#tomcat)
 - [编程基础](#编程基础)
 
@@ -220,7 +222,7 @@
         3. 代理类自带两个拦截器
            -  `new BeanMethodInterceptor()`
                 
-                代理 `beanMethod` 方法，控制 bean 的创建或获取。只有第一次调用调用原方法，手续从 `beanFactory` 中获取 `bean`
+                代理 `beanMethod` 方法，控制 bean 的创建或获取。只有第一次调用调用原方法，后续从 `beanFactory` 中获取 `bean`
 
            -  `new BeanFactoryAwareMethodInterceptor()`
 
@@ -245,9 +247,15 @@
         - AOP 可在此时返回新的 bean 实例
     11. 调用 `DestructionAwareBeanPostProcessor` 的 `requiresDestruction` 方法, 判断时候需要注册 bean 销毁逻辑
 
-    
-
 - [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://segmentfault.com/a/1190000022425759)
+
+## 关键组件
+
+### `PostProcessor` bean 后置处理器
+
+- [`AbstractAdvisorAutoProxyCreator` 决定是否要对当前 bean 进行代理](https://blog.csdn.net/z69183787/article/details/83311522)
+
+    > spring 依赖注入时，什么时候会创建代理类，什么时候是普通 bean？
 
 # Tomcat
 
