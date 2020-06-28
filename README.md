@@ -249,6 +249,12 @@
 
 - [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://segmentfault.com/a/1190000022425759)
 
+- [Spring代理创建及 AOP 链式调用过程](https://www.cnblogs.com/yewy/p/13111814.html#_15)
+
+  - [AOP 切面执行顺序](https://blog.csdn.net/qq_32331073/article/details/80596084?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
+
+    生成 bean 代理时，查找 bean 的候选 Aspect，它们按照 @order 排序，对于 Aspect 内部的合格的 advisor 则按照固定的切面类型 `DEFAULT_PRECEDENCE_COMPARATOR` 进行排序。
+
 ## 关键组件
 
 ### `PostProcessor` bean 后置处理器
