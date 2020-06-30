@@ -280,4 +280,6 @@
 
 # 数据结构
 
-- [`Append-only B+` 树](https://blog.csdn.net/lpstudy/article/details/83722007)
+- [Append-only B+ Tree](https://blog.csdn.net/lpstudy/article/details/83722007)
+
+- [LevelDB 设计与实现 —— LSM tree](https://blog.csdn.net/anderscloud/article/details/7182165)
