@@ -2,6 +2,7 @@
 
 - [Java 基础](#java-基础)
 - [Java 并发](#java-并发)
+- [Java IO](#java-io)
 - [Java 安全](#java-安全)
 - [函数式编程](#函数式编程)
 - [JVM](#jvm)
@@ -81,6 +82,12 @@
     因此，重量级锁可以降级为轻量级锁。
 
 - [`ReentrantReadWriteLock` 保证 `readHolds` 的可见性](https://stackoverflow.com/questions/1675268/java-instance-variable-visibility-threadlocal)
+
+# Java IO
+
+- Linux IO 模型
+  - [简述 Linux IO 模型](https://mp.weixin.qq.com/s/3C7Iv1jof8jitOPL_4c_bQ)
+  - [详述 Linux IO 模型](https://www.jianshu.com/p/486b0965c296)
 
 # Java 安全
 
