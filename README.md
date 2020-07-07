@@ -17,6 +17,7 @@
   - [关键组件](#关键组件)
     - [`PostProcessor` bean 后置处理器](#postprocessor-bean-后置处理器)
 - [Tomcat](#tomcat)
+- [Netty](#netty)
 - [编程基础](#编程基础)
 - [数据结构](#数据结构)
 
@@ -274,6 +275,16 @@
 # Tomcat
 
 - [Tomcat 处理请求过程源码解析](https://blog.csdn.net/leileibest_437147623/article/details/85287568?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
+
+# Netty
+
+> Reactor 模式
+> 
+> Reactor模式是一个事件驱动，用于一种处理一个或多个客户端并发进行服务请求的设计模式。
+> 
+> 它将服务端接收请求与事件处理分离，提高了系统处理并发的能力，`java NIO 的 reactor 模式是基于系统内核的多路复用技术实现的`。
+
+- [Netty 启动源码分析](https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1342147420482011137&__biz=MzI2NzY4MjM1OQ==#wechat_redirect)(猿灯塔|需微信中打开)
 
 # 编程基础
 
