@@ -1,6 +1,7 @@
 <!-- TOC -->
 
 - [Java 基础](#java-基础)
+  - [HashMap](#hashmap)
 - [Java 并发](#java-并发)
 - [Java IO](#java-io)
 - [Java 安全](#java-安全)
@@ -16,6 +17,7 @@
   - [源码解析](#源码解析)
   - [关键组件](#关键组件)
     - [`PostProcessor` bean 后置处理器](#postprocessor-bean-后置处理器)
+- [Dubbo](#dubbo)
 - [Tomcat](#tomcat)
 - [Netty](#netty)
 - [编程基础](#编程基础)
@@ -60,6 +62,12 @@
         拦截器中对被拦截方法的调用通过 `proxy.invokeSuper(obj, args);` 完成，相当于子类直接调用父类，比 `invokeHandler` 的反射调用快些，量大的话。
 
 - [检查型异常与非检查型异常](https://blog.csdn.net/u013630349/article/details/50850880)
+
+## HashMap
+
+- [JDK1.7 HashMap infinite loop](https://my.oschina.net/u/1024107/blog/758588)
+
+- [HashMap 删除节点时的树退化为链表](https://www.cnblogs.com/lifacheng/p/11032482.html)
 
 # Java 并发
 
@@ -258,7 +266,7 @@
 
 - [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://segmentfault.com/a/1190000022425759)
 
-- [Spring代理创建及 AOP 链式调用过程](https://www.cnblogs.com/yewy/p/13111814.html#_15)
+- [Spring代理创建及 AOP 链式调用过程](https://blog.csdn.net/l6108003/article/details/106577515)
 
   - [AOP 切面执行顺序](https://blog.csdn.net/qq_32331073/article/details/80596084?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
@@ -271,6 +279,10 @@
 - [`AbstractAdvisorAutoProxyCreator` 决定是否要对当前 bean 进行代理](https://blog.csdn.net/z69183787/article/details/83311522)
 
     > spring 依赖注入时，什么时候会创建代理类，什么时候是普通 bean？
+
+# Dubbo
+
+- [接口自适应类 T$Adaptive 查看](https://blog.csdn.net/swordyijianpku/article/details/105737163?utm_medium=distribute.pc_relevant.none-task-blog-baidujs-2)
 
 # Tomcat
 
@@ -302,8 +314,14 @@
 
 - [TCP/IP 四次挥手](https://blog.csdn.net/ThinkWon/article/details/104903925?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase)
 
+- 将 javassist 动态生成的类打印出来
+
+    `(ClassGenerator)ccp.getClassPool().get("com.alibaba.dubbo.common.bytecode.Proxy0").debugWriteFile()`
+
 # 数据结构
 
 - [Append-only B+ Tree](https://blog.csdn.net/lpstudy/article/details/83722007)
 
 - [LevelDB 设计与实现 —— LSM tree](https://blog.csdn.net/anderscloud/article/details/7182165)
+
+- [红黑树工具](https://rbtree.phpisfuture.com/)
