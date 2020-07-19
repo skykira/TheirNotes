@@ -2,6 +2,7 @@
 
 - [Java 基础](#java-基础)
   - [HashMap](#hashmap)
+  - [ConcurrentHashMap](#concurrenthashmap)
 - [Java 并发](#java-并发)
 - [Java IO](#java-io)
 - [Java 安全](#java-安全)
@@ -68,6 +69,18 @@
 - [JDK1.7 HashMap infinite loop](https://my.oschina.net/u/1024107/blog/758588)
 
 - [HashMap 删除节点时的树退化为链表](https://www.cnblogs.com/lifacheng/p/11032482.html)
+
+## ConcurrentHashMap
+
+- [ConcurrentHashMap 源码分析](https://blog.csdn.net/u011392897/article/details/60479937)
+
+- [ConcurrentHashMap 扩容图文详解](https://blog.csdn.net/ZOKEKAI/article/details/90051567)
+
+    正在迁移的hash桶遇到 get 操作会发生什么？
+
+    答：在扩容过程期间形成的 hn 和 ln 链是使用的类似于复制引用的方式，也就是说 ln 和 hn 链是复制出来的，而非原来的链表迁移过去的，所以原来 hash 桶上的链表并没有受到影响，因此从迁移开始到迁移结束这段时间都是可以正常访问原数组 hash 桶上面的链表，迁移结束后放置上fwd，往后的访问请求就直接转发到扩容后的数组去了。
+
+- [ConcurrentHashMap 方法总结](https://juejin.im/post/5b001639f265da0b8f62d0f8#comment)
 
 # Java 并发
 
