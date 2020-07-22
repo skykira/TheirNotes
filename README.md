@@ -222,6 +222,12 @@
 
 - [数据库事务中的一致性](https://www.zhihu.com/question/31346392)
 
+- [Innodb 双写防止 `partial page write`](https://blog.csdn.net/jolly10/article/details/79791574)
+
+- [ICP 索引下推](https://database.51cto.com/art/201907/599968.htm)
+
+    针对辅助索引能覆盖到的列，将 where 条件的判断下推到存储引擎层。
+
 # Spring
 
 - [GenericTypeResolver.resolveTypeArguments(Class<?> clazz, Class<?> genericIfc)](https://stackoverflow.com/questions/34271764/generictyperesolver-resolvetypearguments-returns-null)获取继承泛型类的子类的泛型类型
