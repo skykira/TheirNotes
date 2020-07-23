@@ -264,6 +264,12 @@
 
                 为代理类注入 `beanFactory` 属性
 
+- @Async 源码解析
+
+    1. `@EnableAsync` 引入 `AsyncConfigurationSelector.class`，然后引入 `ProxyAsyncConfiguration.class`，最终引入一个 bean `AsyncAnnotationBeanPostProcessor`。
+    2. `AsyncAnnotationBeanPostProcessor`会生成并持有一个切面 `AsyncAnnotationAdvisor`。
+    3. 当扩展点 `postProcessAfterInitialization()` 被调用时，判断当前切面是否能够应用于当前 bean 的某个方法，符合则为当前 bean 创建代理。
+
 - [Bean 创建过程源码解析](https://segmentfault.com/a/1190000022309143#item-3-3)
 
   - createBean 中的扩展点
@@ -286,6 +292,16 @@
 - [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://segmentfault.com/a/1190000022425759)
 
 - [Spring代理创建及 AOP 链式调用过程](https://blog.csdn.net/l6108003/article/details/106577515)
+
+    创建 bean 的过程中，在扩展点 `AbstractAutoProxyCreator.getEarlyBeanReference(）` 或 `AbstractAutoProxyCreator.postProcessAfterInitialization()` 处，获取 `AbstractAutoProxyCreator.wrapIfNecessary()` 方法检测类型为 `Advisor.class` 的 bean 以及被 `@Aspect` 注解注释(主要)的 bean。
+    
+    将 bean 中的切面方法封装为 Advisor，并将切面方法按照固定顺序排序。
+
+    切面 bean 按照 `PriorityOrdered`、`Ordered` 接口或 `@Order` 注解顺序排序。
+
+    选出合格的切面后，创建当前 bean 的代理。
+
+    以 JdkDynamicAopProxy 为例，它作为 InvocationHandler，在调用到它的 invoke() 方法时，它会将上面合格的切面生成为 MethodInterceptor 的调用链，每当代理类方法被调用时，切面方法将被应用。
 
   - [AOP 切面执行顺序](https://blog.csdn.net/qq_32331073/article/details/80596084?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
