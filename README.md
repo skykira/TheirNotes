@@ -268,7 +268,9 @@
 
     1. `@EnableAsync` 引入 `AsyncConfigurationSelector.class`，然后引入 `ProxyAsyncConfiguration.class`，最终引入一个 bean `AsyncAnnotationBeanPostProcessor`。
     2. `AsyncAnnotationBeanPostProcessor`会生成并持有一个切面 `AsyncAnnotationAdvisor`。
-    3. 当扩展点 `postProcessAfterInitialization()` 被调用时，判断当前切面是否能够应用于当前 bean 的某个方法，符合则为当前 bean 创建代理。
+    3. 当扩展点 `postProcessAfterInitialization()` 被调用时，判断
+       1. 当前 bean 已经是代理对象时，判断切面能否应用 bean 的
+       2. 当前切面是否能够应用于当前 bean 的某个方法，符合则为当前 bean 创建代理。
 
 - [Bean 创建过程源码解析](https://segmentfault.com/a/1190000022309143#item-3-3)
 
@@ -306,6 +308,10 @@
   - [AOP 切面执行顺序](https://blog.csdn.net/qq_32331073/article/details/80596084?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
     生成 bean 代理时，查找 bean 的候选 Aspect，它们按照 @order 排序，对于 Aspect 内部的合格的 advisor 则按照固定的切面类型 `DEFAULT_PRECEDENCE_COMPARATOR` 进行排序。
+
+    对于切面内部的 Advisor 顺序，为了满足 `Around -> Before -> Around -> After -> AfterReturning -> AfterThrowing` 的顺序，在执行时的 Advisor 调用链中，它们的顺序如下图所示。
+
+    ![]()
 
 ## 关键组件
 
