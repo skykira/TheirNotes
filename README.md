@@ -269,8 +269,8 @@
     1. `@EnableAsync` 引入 `AsyncConfigurationSelector.class`，然后引入 `ProxyAsyncConfiguration.class`，最终引入一个 bean `AsyncAnnotationBeanPostProcessor`。
     2. `AsyncAnnotationBeanPostProcessor`会生成并持有一个切面 `AsyncAnnotationAdvisor`。
     3. 当扩展点 `postProcessAfterInitialization()` 被调用时，判断
-       1. 当前 bean 已经是代理对象时，判断切面能否应用 bean 的
-       2. 当前切面是否能够应用于当前 bean 的某个方法，符合则为当前 bean 创建代理。
+       1. 当前 bean 已经是代理对象时，判断切面能否应用 bean 的方法，可以则放入代理的切面中。
+       2. 当前 bean 非代理对象时，切面合格，则创建代理，否则返回原始 bean。
 
 - [Bean 创建过程源码解析](https://segmentfault.com/a/1190000022309143#item-3-3)
 
@@ -297,7 +297,7 @@
 
     创建 bean 的过程中，在扩展点 `AbstractAutoProxyCreator.getEarlyBeanReference(）` 或 `AbstractAutoProxyCreator.postProcessAfterInitialization()` 处，获取 `AbstractAutoProxyCreator.wrapIfNecessary()` 方法检测类型为 `Advisor.class` 的 bean 以及被 `@Aspect` 注解注释(主要)的 bean。
     
-    将 bean 中的切面方法封装为 Advisor，并将切面方法按照固定顺序排序。
+    将切面 bean 中的增强方法封装为 Advisor，并将切面方法按照固定顺序排序。
 
     切面 bean 按照 `PriorityOrdered`、`Ordered` 接口或 `@Order` 注解顺序排序。
 
@@ -307,12 +307,24 @@
 
   - [AOP 切面执行顺序](https://blog.csdn.net/qq_32331073/article/details/80596084?utm_medium=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_t0.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
-    生成 bean 代理时，查找 bean 的候选 Aspect，它们按照 @order 排序，对于 Aspect 内部的合格的 advisor 则按照固定的切面类型 `DEFAULT_PRECEDENCE_COMPARATOR` 进行排序。
-
-    对于切面内部的 Advisor 顺序，为了满足 `Around -> Before -> Around -> After -> AfterReturning -> AfterThrowing` 的顺序，在执行时的 Advisor 调用链中，它们的顺序如下图所示。
+    对于切面内部的 Advisor 顺序，为了满足 `Around -> Before -> Around -> After -> AfterReturning -> AfterThrowing` 的顺序，在执行时的 Advisor 调用链中，它们的顺序如下图所示，该顺序在为 bean 生成代理时便排好序了。
 
     ![同一个Aspect内Advisor的顺序
 ](https://github.com/skykira/TheirNotes/blob/master/source/picture/%E5%90%8C%E4%B8%80%E4%B8%AAAspect%E5%86%85Advisor%E7%9A%84%E9%A1%BA%E5%BA%8F.png?raw=true)
+
+- [Spring 循环依赖](https://blog.csdn.net/f641385712/article/details/92801300)
+
+    循环依赖是因为对象之间循环引用，造成闭环。造成循环依赖情况包括，构造器注入、prototype 模式的属性注入、单例模式的属性注入或方法注入三种。
+    
+    Spring 能解决单例模式的属性注入造成循环依赖的情况。解决方法是将 bean 实例化后初始化前的中间态暴露出来，然后通过三级缓存保证引用正确。
+
+  - [Spring 解决循环依赖为什么使用三级缓存，而不是二级缓存](https://www.cnblogs.com/grey-wolf/p/13034371.html)
+
+    `getEarlyBeanReference()` 为 `SmartInstantiationAwareBeanPostProcessor` 提供了在 bean 初始化前暴露自己的机会，用于解决初始化 bean 时， `BeanPostProcessor` 最终将 bean 包装为代理类，而之前暴露出去的 bean 是原始类的问题。
+
+  - [@Async 导致循环依赖报错原理](https://blog.csdn.net/f641385712/article/details/92797058)
+
+    
 
 ## 关键组件
 
