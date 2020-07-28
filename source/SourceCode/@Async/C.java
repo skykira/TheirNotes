@@ -1,4 +1,4 @@
-package com.clubfactory.bargain.core.pxy;
+package com.xxx.pxy;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
