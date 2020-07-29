@@ -8,6 +8,7 @@
 - [Java 安全](#java-安全)
 - [函数式编程](#函数式编程)
 - [JVM](#jvm)
+  - [垃圾收集](#垃圾收集)
   - [字节码操作](#字节码操作)
   - [调优](#调优)
 - [分布式](#分布式)
@@ -63,6 +64,10 @@
         拦截器中对被拦截方法的调用通过 `proxy.invokeSuper(obj, args);` 完成，相当于子类直接调用父类，比 `invokeHandler` 的反射调用快些，量大的话。
 
 - [检查型异常与非检查型异常](https://blog.csdn.net/u013630349/article/details/50850880)
+
+- [类加载器全盘负责思想的限制](https://blog.csdn.net/byamao1/article/details/62884720)
+
+    > 调用者只会使用它自己的 ClassLoader 来装载别的类
 
 ## HashMap
 
@@ -151,6 +156,10 @@
 
 - [缓存行伪共享 (False Sharing)](http://ifeve.com/falsesharing/)
 
+- [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
+
+## 垃圾收集
+
 - [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
 
 - [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
@@ -163,11 +172,17 @@
 
         Incremental Update 在某个黑对象又引用了某个白对象时，会将该黑对象置灰，因此该算法在完成并发 marking 后 需要重新扫描根集合，重新将灰置黑。
 
-    - [PrevBitmap 和 NextBitmap 的作用](https://www.jianshu.com/p/aef0f4765098)
+    - [Region 两个 Bitmap 详解 ](https://mp.weixin.qq.com/s/5BIFme6bmyOA0WbKOllbjw)
 
-        Region 的 prevTAMS 和 nextTAMS 用于记录并发标记过程中，新分配的对象，同时存储个快照。write barrier 用于记录已标记的对象引用发生更改的情况。
+        Region 的 prevTAMS 和 nextTAMS 用于记录并发标记过程中，新分配的对象，同时存储个快照。
 
     - [G1-Card Table 和 RSet 的关系](https://blog.csdn.net/luzhensmart/article/details/106052574)
+
+    - [RSet 结构解释](https://zhuanlan.zhihu.com/p/130479811?utm_source=wechat_session&utm_medium=social&utm_oi=70601460940800)
+
+        RSet 是一个 points-into 结构，记录了谁引用了我。
+        
+        它可以看做一个 Hashtable<key,int[]>。key 为其它 Region，int[] 代表了其它 Region 的 `Card Table`。垃圾收集时，找到 RSet 中指示的区域，作为 GCRoots 的一部分。
 
 - [ZGC 的特点](https://mp.weixin.qq.com/s/KUCs_BJUNfMMCO1T3_WAjw)
 
@@ -180,8 +195,6 @@
 - [ParallelScavenge 的 fullGC](https://www.zhihu.com/question/48780091/answer/113063216)
 
 - [GCLocker-initiated young GC 多余发生](https://www.jianshu.com/p/ecc57a81f73c)
-
-- [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
 
 ## 字节码操作
 
