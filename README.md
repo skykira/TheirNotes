@@ -89,6 +89,8 @@
 
 # Java 并发
 
+- [用户态内核态间切换耗时的原因](https://blog.csdn.net/u010727189/article/details/103401970)
+
 - [Java 线程状态转换图](http://mcace.me/java%E5%B9%B6%E5%8F%91/2018/08/24/java-thread-states.html)
 
 - [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
