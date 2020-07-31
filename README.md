@@ -3,6 +3,7 @@
 - [Java 基础](#java-基础)
   - [HashMap](#hashmap)
   - [ConcurrentHashMap](#concurrenthashmap)
+  - [Reference](#reference)
 - [Java 并发](#java-并发)
 - [Java IO](#java-io)
 - [Java 安全](#java-安全)
@@ -87,6 +88,10 @@
 
 - [ConcurrentHashMap 方法总结](https://juejin.im/post/5b001639f265da0b8f62d0f8#comment)
 
+## Reference
+
+- [PhantomReference & Cleaner 的运行原理](https://zhuanlan.zhihu.com/p/29454205)
+
 # Java 并发
 
 - [用户态内核态间切换耗时的原因](https://blog.csdn.net/u010727189/article/details/103401970)
@@ -111,6 +116,10 @@
     因此，重量级锁可以降级为轻量级锁。
 
 - [`ReentrantReadWriteLock` 保证 `readHolds` 的可见性](https://stackoverflow.com/questions/1675268/java-instance-variable-visibility-threadlocal)
+
+- [LockSupport.park() 原理](https://blog.csdn.net/anlian523/article/details/106752414)
+
+    如果中断状态为true，那么park无法阻塞。
 
 # Java IO
 
