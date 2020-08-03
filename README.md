@@ -5,6 +5,7 @@
   - [ConcurrentHashMap](#concurrenthashmap)
   - [Reference](#reference)
 - [Java 并发](#java-并发)
+  - [偏向锁](#偏向锁)
 - [Java IO](#java-io)
 - [Java 安全](#java-安全)
 - [函数式编程](#函数式编程)
@@ -98,11 +99,42 @@
 
 - [Java 线程状态转换图](http://mcace.me/java%E5%B9%B6%E5%8F%91/2018/08/24/java-thread-states.html)
 
-- [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
+## 偏向锁
 
 - [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)
 
-    未达到批量重偏向阈值时，偏向锁膨胀为轻量级锁；达到批量重偏向阈值时，锁对象才会进行重偏向操作，且重偏向只能有一次。
+    假设有类 A。
+
+    1. 初始状态的对象 a 为可偏向未偏向状态
+
+    2. 当`线程 1` 对对象 a1 加锁后，a1 对象头 markword 状态偏向于`线程 1`，之后`线程 1`加锁时，发现锁偏向于自己，无需 CAS 替换对象头，可直接进入同步块。
+    3. `线程 2`想要对对象 a1 加锁，发现 a1 偏向于 `线程 1`，触发锁撤销，此时 a1 的锁升级为轻量级锁。
+    4. `线程 2`在 `BiasedLockingDecayTime`(默认25s) 时间内对类 A 的偏向锁撤销数量达到重偏向阈值(BiasedLockingBulkRebiasThreshold)时，触发批量重偏向，epoch 值加一，相当于将 A 类所有对象的偏向锁失效，重置为可偏向未偏向状态。此时，若有线程对对象 a 加锁，对象将会偏向于该线程。
+    5. `线程 x`(或其它任意线程) 对已偏向其它线程的对象 ax 加锁，触发偏向锁撤销，当锁撤销数量达到批量锁撤销阈值(BiasedLockingBulkRevokeThreshold)时，触发批量锁撤销，类 A 新生成对象 markword 初始状态为无锁不可偏向状态。
+
+- `Eliminating Synchronization-Related Atomic Operations with Biased Locking and Bulk Rebiasing` [偏向锁论文阅读](https://www.jianshu.com/p/e47ad923dee5)
+
+    `轻量级锁`的技术假设是，在实际程序中，大多数锁的获取是没有争用的。
+    
+    `偏向锁`的技术假设是，大多数监视器不仅是没有争用的，而且在它们的生命周期中仅有一个线程进入和退出。
+
+    批量重偏向认为，当偏向锁撤销数量达到某个阈值时，对象当下的偏向已经没有收益了，需要重新选择偏向。批量锁撤销认为，达到该阈值时，该类确实存在竞争，已经不适合使用偏向锁了。
+
+    偏向锁的升级过程：
+
+    1. T1 持有 a1 的偏向锁，T2 获取锁时，发现 a1 偏向 T1。
+    2. 查看 a1 markword 中 epoch 值是否与类 A 的 epoch 值一致，不一致则表示 a1 当前的偏向无效，可以直接将 a1 偏向于自己。
+    3. 如果一致，开始执行锁撤销。
+    4. 当程序运行到全局安全点时，T2 遍历偏向锁持有线程的线程栈，查找与对象 a1 相关的 `Lock Record`。
+    
+    > 偏向锁获取时，会在当前线程线程栈中置入一个空置的 `Lock Record`，且无需 CAS 填入 `displaced markword`。
+
+    5. 遍历到后，将轻量级锁需要的 markword 填充进去，完成轻量级锁升级。
+    6. 如果没有遍历到，则将对象 markword 状态改为可偏向未偏向状态，然后重新 CAS 尝试获取锁。
+
+- [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
+
+
 
 - [Java 中 `volatile` 的语义](https://www.jianshu.com/p/4e59476963b0)
 
