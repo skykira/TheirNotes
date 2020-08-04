@@ -24,6 +24,7 @@
 - [Dubbo](#dubbo)
 - [Tomcat](#tomcat)
 - [Netty](#netty)
+- [Linux](#linux)
 - [编程基础](#编程基础)
 - [数据结构](#数据结构)
 
@@ -99,6 +100,8 @@
 
 - [Java 线程状态转换图](http://mcace.me/java%E5%B9%B6%E5%8F%91/2018/08/24/java-thread-states.html)
 
+- [synchronized的实现原理](https://www.cnblogs.com/longshiyVip/p/5213771.html)
+
 ## 偏向锁
 
 - [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)
@@ -132,9 +135,9 @@
     5. 遍历到后，将轻量级锁需要的 markword 填充进去，完成轻量级锁升级。
     6. 如果没有遍历到，则将对象 markword 状态改为可偏向未偏向状态，然后重新 CAS 尝试获取锁。
 
-- [对象计算 hashcode 将导致偏向锁膨胀](https://blog.csdn.net/P19777/article/details/103125545)
+- [对象计算 hashcode 将导致偏向锁膨胀](https://www.zhihu.com/question/52116998)
 
-
+    当一个对象当前正处于偏向锁状态，并且需要计算其identity hash code的话，则它的偏向锁会被撤销，并且锁会膨胀为重量锁。
 
 - [Java 中 `volatile` 的语义](https://www.jianshu.com/p/4e59476963b0)
 
@@ -421,6 +424,10 @@
 - [SocketChannel 与 ServerSocketChannel 区别](https://blog.csdn.net/hzmlg1988/article/details/88082492)
 
 - [Netty 启动源码分析](https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1342147420482011137&__biz=MzI2NzY4MjM1OQ==#wechat_redirect)(猿灯塔|需微信中打开)
+
+# Linux
+
+- [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)
 
 # 编程基础
 
