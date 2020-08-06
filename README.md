@@ -5,6 +5,7 @@
   - [ConcurrentHashMap](#concurrenthashmap)
   - [Reference](#reference)
 - [Java 并发](#java-并发)
+  - [AQS](#aqs)
   - [偏向锁](#偏向锁)
 - [Java IO](#java-io)
 - [Java 安全](#java-安全)
@@ -102,6 +103,12 @@
 - [Java 线程状态转换图](http://mcace.me/java%E5%B9%B6%E5%8F%91/2018/08/24/java-thread-states.html)
 
 - [synchronized的实现原理](https://www.cnblogs.com/longshiyVip/p/5213771.html)
+
+## AQS
+
+- [CLH、MCS队列锁](https://www.cnblogs.com/sanzao/p/10567529.html)
+
+    自旋锁具有一定的缺陷，非公平、线程饥饿、锁标识同步耗费资源，因此产生了队列锁，对多个自旋锁进行管理。
 
 ## 偏向锁
 
