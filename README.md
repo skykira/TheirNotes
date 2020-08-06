@@ -24,6 +24,7 @@
 - [Dubbo](#dubbo)
 - [Tomcat](#tomcat)
 - [Netty](#netty)
+- [Kafka](#kafka)
 - [Linux](#linux)
 - [编程基础](#编程基础)
 - [数据结构](#数据结构)
@@ -424,6 +425,16 @@
 - [SocketChannel 与 ServerSocketChannel 区别](https://blog.csdn.net/hzmlg1988/article/details/88082492)
 
 - [Netty 启动源码分析](https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1342147420482011137&__biz=MzI2NzY4MjM1OQ==#wechat_redirect)(猿灯塔|需微信中打开)
+
+# Kafka
+
+- [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
+
+- [kafka 的时间轮设计](https://blog.lovezhy.cc/2020/01/11/Kafka%E6%8C%87%E5%8D%97-%E6%97%B6%E9%97%B4%E8%BD%AE%E5%AE%9E%E7%8E%B0/)
+
+    currentTime 在有了 queue 之后，就没有其他作用了，主要就是在 add 方法中拦住即将过期或者已经过期的任务。
+
+    上级时间轮降级时，对于 timerTaskEntry 需要重新插入。
 
 # Linux
 
