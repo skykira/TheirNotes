@@ -273,6 +273,20 @@
 
 - [PBFT 算法各阶段消息发送数量证明](https://zhuanlan.zhihu.com/p/53897982)
 
+## 分布式锁
+
+### Redis 分布式锁
+
+- [基于Redis的分布式锁到底安全吗?](https://www.jianshu.com/p/dd66bdd18a56)
+
+- [Redission 实现](https://www.jianshu.com/p/f302aa345ca8)
+
+    为了防止用户加锁后，解锁失败，导致其余客户端无法继续获取锁，所以需要给分布式锁一个过期时限，保证解锁失败后，锁能过期自动释放。
+    
+    这是一种典型的[租约机制](https://zhuanlan.zhihu.com/p/101913195)。
+
+    > 锁的失效时间设置是个纠结的问题。当用户并不知道自己将会用多久的锁时，我们为该锁设置一个较小的租期，同时每隔一段时间，在该锁过期之前，自动续租。用户获得锁后，可以启动一个后台线程，周期性查询用户是否还持有锁，持有则续期。
+
 # DateBase
 
 - [MySQL LEFT JOIN/ INNER JOIN/RIGHT JOIN 执行过程](https://learnku.com/articles/27701)
