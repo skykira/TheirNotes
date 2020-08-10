@@ -17,6 +17,8 @@
 - [分布式](#分布式)
   - [Raft](#raft)
   - [BFT](#bft)
+  - [分布式锁](#分布式锁)
+    - [Redis 分布式锁](#redis-分布式锁)
 - [DateBase](#datebase)
 - [Spring](#spring)
   - [源码解析](#源码解析)
@@ -103,6 +105,8 @@
 - [Java 线程状态转换图](http://mcace.me/java%E5%B9%B6%E5%8F%91/2018/08/24/java-thread-states.html)
 
 - [synchronized的实现原理](https://www.cnblogs.com/longshiyVip/p/5213771.html)
+
+- [深入理解Java线程池：ThreadPoolExecutor](http://www.ideabuffer.cn/2017/04/04/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B%E6%B1%A0%EF%BC%9AThreadPoolExecutor/#addWorker%E6%96%B9%E6%B3%95)
 
 ## AQS
 
