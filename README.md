@@ -1,29 +1,29 @@
 <!-- TOC -->
 
 - [Java 基础](#java-基础)
-  - [HashMap](#hashmap)
-  - [ConcurrentHashMap](#concurrenthashmap)
-  - [Reference](#reference)
+    - [HashMap](#hashmap)
+    - [ConcurrentHashMap](#concurrenthashmap)
+    - [Reference](#reference)
 - [Java 并发](#java-并发)
-  - [AQS](#aqs)
-  - [偏向锁](#偏向锁)
+    - [AQS](#aqs)
+    - [偏向锁](#偏向锁)
 - [Java IO](#java-io)
 - [Java 安全](#java-安全)
 - [函数式编程](#函数式编程)
 - [JVM](#jvm)
-  - [垃圾收集](#垃圾收集)
-  - [字节码操作](#字节码操作)
-  - [调优](#调优)
+    - [垃圾收集](#垃圾收集)
+    - [字节码操作](#字节码操作)
+    - [调优](#调优)
 - [分布式](#分布式)
-  - [Raft](#raft)
-  - [BFT](#bft)
-  - [分布式锁](#分布式锁)
-    - [Redis 分布式锁](#redis-分布式锁)
+    - [Raft](#raft)
+    - [BFT](#bft)
+    - [分布式锁](#分布式锁)
+        - [Redis 分布式锁](#redis-分布式锁)
 - [DateBase](#datebase)
 - [Spring](#spring)
-  - [源码解析](#源码解析)
-  - [关键组件](#关键组件)
-    - [`PostProcessor` bean 后置处理器](#postprocessor-bean-后置处理器)
+    - [源码解析](#源码解析)
+    - [关键组件](#关键组件)
+        - [`PostProcessor` bean 后置处理器](#postprocessor-bean-后置处理器)
 - [Dubbo](#dubbo)
 - [Tomcat](#tomcat)
 - [Netty](#netty)
@@ -34,7 +34,7 @@
 
 <!-- /TOC -->
 
-# Java 基础
+# 1. Java 基础
 
 - [`Class.this` 与 `this` 的区别](https://stackoverflow.com/questions/5666134/what-is-the-difference-between-class-this-and-this-in-java)
 
@@ -76,7 +76,7 @@
 
     > 调用者只会使用它自己的 ClassLoader 来装载别的类
 
-## HashMap
+## 1.1. HashMap
 
 - [HashMap 源码分析](https://segmentfault.com/a/1190000012926722)
 
@@ -84,7 +84,7 @@
 
 - [HashMap 删除节点时的树退化为链表](https://www.cnblogs.com/lifacheng/p/11032482.html)
 
-## ConcurrentHashMap
+## 1.2. ConcurrentHashMap
 
 - [ConcurrentHashMap 源码分析](https://blog.csdn.net/u011392897/article/details/60479937)
 
@@ -96,11 +96,11 @@
 
 - [ConcurrentHashMap 方法总结](https://juejin.im/post/5b001639f265da0b8f62d0f8#comment)
 
-## Reference
+## 1.3. Reference
 
 - [PhantomReference & Cleaner 的运行原理](https://zhuanlan.zhihu.com/p/29454205)
 
-# Java 并发
+# 2. Java 并发
 
 - [用户态内核态间切换耗时的原因](https://blog.csdn.net/u010727189/article/details/103401970)
 
@@ -110,13 +110,13 @@
 
 - [深入理解Java线程池：ThreadPoolExecutor](http://www.ideabuffer.cn/2017/04/04/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B%E6%B1%A0%EF%BC%9AThreadPoolExecutor/#addWorker%E6%96%B9%E6%B3%95)
 
-## AQS
+## 2.1. AQS
 
 - [CLH、MCS队列锁](https://www.cnblogs.com/sanzao/p/10567529.html)
 
     自旋锁具有一定的缺陷，非公平、线程饥饿、锁标识同步耗费资源，因此产生了队列锁，对多个自旋锁进行管理。
 
-## 偏向锁
+## 2.2. 偏向锁
 
 - [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)
 
@@ -170,23 +170,27 @@
 
     如果中断状态为true，那么park无法阻塞。
 
-# Java IO
+# 3. Java IO
 
 - Linux IO 模型
   - [简述 Linux IO 模型](https://mp.weixin.qq.com/s/3C7Iv1jof8jitOPL_4c_bQ)
   - [详述 Linux IO 模型](https://www.jianshu.com/p/486b0965c296)
 
-# Java 安全
+- [阻塞非阻塞与同步异步的区别](https://www.zhihu.com/question/19732473/answer/241673170)
+
+  进程间通信
+
+# 4. Java 安全
 
 - [如何理解恶意代码执行 `AccessController.doPrivileged()`](https://stackoverflow.com/questions/37962070/malicious-code-running-accesscontroller-doprivileged)
 
 - [java沙箱绕过](https://www.anquanke.com/post/id/151398)
 
-# 函数式编程
+# 5. 函数式编程
 
 - [`BiConsumer` 为什么可以引用仅有一个参数的方法](https://stackoverflow.com/questions/58046693/biconsumer-and-method-reference-of-one-parameter)
 
-# JVM
+# 6. JVM
 
 - [图说 Java 字节码指令](https://segmentfault.com/a/1190000008606277)
 
@@ -218,7 +222,7 @@
 
 - [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
 
-## 垃圾收集
+## 6.1. 垃圾收集
 
 - [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
 
@@ -256,7 +260,7 @@
 
 - [GCLocker-initiated young GC 多余发生](https://www.jianshu.com/p/ecc57a81f73c)
 
-## 字节码操作
+## 6.2. 字节码操作
 
 - [理解字节码增强工具包 Instrumentation ](https://www.throwable.club/2019/06/29/java-understand-instrument-first/)
 
@@ -265,23 +269,23 @@
 - [Java 字节码增强技术](https://tech.meituan.com/2019/09/05/java-bytecode-enhancement.html)
 
 
-## 调优
+## 6.3. 调优
 
 - [jmap 指令慎用](https://blog.csdn.net/seeJavaDocs/article/details/53643227)
 
-# 分布式
+# 7. 分布式
 
-## Raft
+## 7.1. Raft
 
 - [客户端只读请求的处理](https://zhuanlan.zhihu.com/p/36592467)
 
-## BFT
+## 7.2. BFT
 
 - [PBFT 算法各阶段消息发送数量证明](https://zhuanlan.zhihu.com/p/53897982)
 
-## 分布式锁
+## 7.3. 分布式锁
 
-### Redis 分布式锁
+### 7.3.1. Redis 分布式锁
 
 - [基于Redis的分布式锁到底安全吗?](https://www.jianshu.com/p/dd66bdd18a56)
 
@@ -293,7 +297,7 @@
 
     > 锁的失效时间设置是个纠结的问题。当用户并不知道自己将会用多久的锁时，我们为该锁设置一个较小的租期，同时每隔一段时间，在该锁过期之前，自动续租。用户获得锁后，可以启动一个后台线程，周期性查询用户是否还持有锁，持有则续期。
 
-# DateBase
+# 8. DateBase
 
 - [MySQL LEFT JOIN/ INNER JOIN/RIGHT JOIN 执行过程](https://learnku.com/articles/27701)
 
@@ -315,7 +319,7 @@
 
     针对辅助索引能覆盖到的列，将 where 条件的判断下推到存储引擎层。
 
-# Spring
+# 9. Spring
 
 - [GenericTypeResolver.resolveTypeArguments(Class<?> clazz, Class<?> genericIfc)](https://stackoverflow.com/questions/34271764/generictyperesolver-resolvetypearguments-returns-null)获取继承泛型类的子类的泛型类型
 
@@ -332,7 +336,7 @@
 
 - [`$$` 与 `<generated>` 代表的含义](https://stackoverflow.com/questions/33605246/what-does-and-generated-means-in-java-stacktrace)
 
-## 源码解析
+## 9.1. 源码解析
 
 - [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/8SpwGLMn_ewmT7h6Cn88_Q)
 
@@ -425,23 +429,23 @@
     9.  初始化完成后，因为 `c` 的早期引用暴露出去了，因此需要循环依赖检查。发现 `d` 依赖 `c`，且位于 `alreadyCreated` 中，说明创建过，得到过 `c` 的早期引用(一号)，因此单例 `c` 出现了不同的版本在不同的引用中，报错。
     
 
-## 关键组件
+## 9.2. 关键组件
 
-### `PostProcessor` bean 后置处理器
+### 9.2.1. `PostProcessor` bean 后置处理器
 
 - [`AbstractAdvisorAutoProxyCreator` 决定是否要对当前 bean 进行代理](https://blog.csdn.net/z69183787/article/details/83311522)
 
     > spring 依赖注入时，什么时候会创建代理类，什么时候是普通 bean？
 
-# Dubbo
+# 10. Dubbo
 
 - [接口自适应类 T$Adaptive 查看](https://blog.csdn.net/swordyijianpku/article/details/105737163?utm_medium=distribute.pc_relevant.none-task-blog-baidujs-2)
 
-# Tomcat
+# 11. Tomcat
 
 - [Tomcat 处理请求过程源码解析](https://blog.csdn.net/leileibest_437147623/article/details/85287568?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
-# Netty
+# 12. Netty
 
 > Reactor 模式
 > 
@@ -455,7 +459,7 @@
 
 - [netty 时间轮设计](https://zacard.net/2016/12/02/netty-hashedwheeltimer/)
 
-# Kafka
+# 13. Kafka
 
 - [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
 
@@ -465,11 +469,11 @@
 
     上级时间轮降级时，对于 timerTaskEntry 需要重新插入。
 
-# Linux
+# 14. Linux
 
 - [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)
 
-# 编程基础
+# 15. 编程基础
 
 - [正则表达式的环视](https://blog.csdn.net/lxcnn/article/details/4304754)
 
@@ -487,7 +491,7 @@
 
     `(ClassGenerator)ccp.getClassPool().get("com.alibaba.dubbo.common.bytecode.Proxy0").debugWriteFile()`
 
-# 数据结构
+# 16. 数据结构
 
 - [Append-only B+ Tree](https://blog.csdn.net/lpstudy/article/details/83722007)
 
