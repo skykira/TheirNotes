@@ -78,6 +78,8 @@
 
 ## HashMap
 
+- [HashMap 源码分析](https://segmentfault.com/a/1190000012926722)
+
 - [JDK1.7 HashMap infinite loop](https://my.oschina.net/u/1024107/blog/758588)
 
 - [HashMap 删除节点时的树退化为链表](https://www.cnblogs.com/lifacheng/p/11032482.html)
