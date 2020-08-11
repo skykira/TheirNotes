@@ -172,9 +172,7 @@
 
 # 3. Java IO
 
-- Linux IO 模型
-  - [简述 Linux IO 模型](https://mp.weixin.qq.com/s/3C7Iv1jof8jitOPL_4c_bQ)
-  - [详述 Linux IO 模型](https://www.jianshu.com/p/486b0965c296)
+- [Java I/O体系从原理到应用](https://mp.weixin.qq.com/s/khyOVIqFp1vNK29OIMBBuQ)
 
 - [阻塞非阻塞与同步异步的区别](https://www.zhihu.com/question/19732473/answer/241673170)
 
@@ -470,6 +468,10 @@
     上级时间轮降级时，对于 timerTaskEntry 需要重新插入。
 
 # 14. Linux
+
+- Linux IO 模型
+  - [简述 Linux IO 模型](https://mp.weixin.qq.com/s/3C7Iv1jof8jitOPL_4c_bQ)
+  - [详述 Linux IO 模型](https://www.jianshu.com/p/486b0965c296)
 
 - [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)
 
