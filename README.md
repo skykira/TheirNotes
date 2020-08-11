@@ -1,29 +1,29 @@
 <!-- TOC -->
 
 - [1. Java 基础](#1-java-基础)
-    - [1.1. HashMap](#11-hashmap)
-    - [1.2. ConcurrentHashMap](#12-concurrenthashmap)
-    - [1.3. Reference](#13-reference)
+  - [1.1. HashMap](#11-hashmap)
+  - [1.2. ConcurrentHashMap](#12-concurrenthashmap)
+  - [1.3. Reference](#13-reference)
 - [2. Java 并发](#2-java-并发)
-    - [2.1. AQS](#21-aqs)
-    - [2.2. 偏向锁](#22-偏向锁)
+  - [2.1. AQS](#21-aqs)
+  - [2.2. 偏向锁](#22-偏向锁)
 - [3. Java IO](#3-java-io)
 - [4. Java 安全](#4-java-安全)
 - [5. 函数式编程](#5-函数式编程)
 - [6. JVM](#6-jvm)
-    - [6.1. 垃圾收集](#61-垃圾收集)
-    - [6.2. 字节码操作](#62-字节码操作)
-    - [6.3. 调优](#63-调优)
+  - [6.1. 垃圾收集](#61-垃圾收集)
+  - [6.2. 字节码操作](#62-字节码操作)
+  - [6.3. 调优](#63-调优)
 - [7. 分布式](#7-分布式)
-    - [7.1. Raft](#71-raft)
-    - [7.2. BFT](#72-bft)
-    - [7.3. 分布式锁](#73-分布式锁)
-        - [7.3.1. Redis 分布式锁](#731-redis-分布式锁)
+  - [7.1. Raft](#71-raft)
+  - [7.2. BFT](#72-bft)
+  - [7.3. 分布式锁](#73-分布式锁)
+    - [7.3.1. Redis 分布式锁](#731-redis-分布式锁)
 - [8. DateBase](#8-datebase)
 - [9. Spring](#9-spring)
-    - [9.1. 源码解析](#91-源码解析)
-    - [9.2. 关键组件](#92-关键组件)
-        - [9.2.1. `PostProcessor` bean 后置处理器](#921-postprocessor-bean-后置处理器)
+  - [9.1. 源码解析](#91-源码解析)
+  - [9.2. 关键组件](#92-关键组件)
+    - [9.2.1. `PostProcessor` bean 后置处理器](#921-postprocessor-bean-后置处理器)
 - [10. Dubbo](#10-dubbo)
 - [11. Tomcat](#11-tomcat)
 - [12. Netty](#12-netty)
@@ -472,6 +472,53 @@
 # 14. Linux
 
 - [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)
+
+- [Linux 零拷贝技术](https://mp.weixin.qq.com/s/0SHaQBgMJ4MlKjX6m08EpQ)
+
+  Linux I/O 设备与主存信息传送的控制方式分为程序轮询、中断、DMA等。
+
+  在 Linux 中零拷贝技术主要有 3 个实现思路:
+
+    1. 用户态直接 I/O
+    2. 减少数据拷贝次数
+    3. 写时复制技术
+
+  以读取磁盘数据，写入网卡为例，实现方式：
+
+    1. 用户态直接 I/O
+      
+        内核仅进行必要的配置，虽然还有用户内核空间上下文切换的开销，但减少了 CPU 拷贝
+
+    2. mmap() + write
+      
+        将用户缓冲区的部分区域映射到内核缓冲区，减少了一次内核向用户缓冲的 CPU 拷贝
+
+    3. sendfile
+
+        sendfile 命令之前，读取写入通过 read() 和 write() 命令，存在四次上下文切换以及向用户空间的冗余拷贝。
+
+        Sendfile 调用中 I/O 数据对用户空间是完全不可见的，完全交由内核去进行数据传输。不过，问题是，过程中用户无法对数据进行修改了。
+
+    4. Sendfile + DMA gather copy
+
+        磁盘读入到内核缓冲区的数据，本来需要传输到 Socket 缓冲区，然后才通过 DMA 拷贝到网卡中。
+
+        如今，在硬件的支持下，Sendfile 拷贝方式仅仅是将数据的描述信息，即，缓冲区文件描述符和数据长度的拷贝，拷贝到 Socket 缓冲区中。
+
+        发往网卡时，直接从内核缓冲区中取。又减少了一次 CPU 拷贝。
+
+    5. Splice
+
+        Sendfile 只适用于将数据从文件拷贝到 socket 套接字上，而 Splice 系统调用，不仅不需要硬件支持，还实现了两个文件描述符之间的数据零拷贝。
+
+    6. 写时复制
+
+        内核缓冲区被多个进程共享时，降低了系统开销。
+
+    7. 缓冲区共享
+
+        通过缓冲区池，它能被同时映射到用户空间（user space）和内核态（kernel space），完全省去了拷贝。
+
 
 # 15. 编程基础
 
