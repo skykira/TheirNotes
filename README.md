@@ -58,6 +58,8 @@
 
 - [理解 Java 的线程中断](https://blog.csdn.net/canot/article/details/51087772)
 
+- [Java 自定义序列化](https://www.jianshu.com/p/352fa61e0512)
+
 - [Java 动态代理](https://github.com/skykira/TheirNotes/tree/master/SourceCode/JDK%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86)
 
     - [JDK 自带动态代理源码分析](https://blog.csdn.net/weixin_43217817/article/details/102268504)
