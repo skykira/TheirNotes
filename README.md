@@ -557,3 +557,5 @@
 - [LevelDB 设计与实现 —— LSM tree](https://blog.csdn.net/anderscloud/article/details/7182165)
 
 - [红黑树工具](https://rbtree.phpisfuture.com/)
+
+- [红黑树与 AVL 树比较](https://www.zhihu.com/question/19856999/answer/1254240739)
