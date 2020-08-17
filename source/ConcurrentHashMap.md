@@ -81,8 +81,6 @@ private static final ObjectStreamField[] serialPersistentFields = {
     new ObjectStreamField("segmentMask", Integer.TYPE),
     new ObjectStreamField("segmentShift", Integer.TYPE)
 };
- 
-// Unsafe初始化跟1.7版本的基本一样，不说了
 ```
 
 ### 变量
@@ -99,24 +97,13 @@ private transient EntrySetView<K,V> entrySet;
 //     这个大步骤执行时，通过sizeCtl经过一些计算得出来的扩容线程的数量是0
 private transient volatile Node<K,V>[] nextTable;
  
-// 非常重要的一个属性，源码中的英文翻译，直译过来是下面的四行文字的意思
-//     sizeCtl = -1，表示有线程正在进行真正的初始化操作
-//     sizeCtl = -(1 + nThreads)，表示有nThreads个线程正在进行扩容操作
-//     sizeCtl > 0，表示接下来的真正的初始化操作中使用的容量，或者初始化/扩容完成后的threshold
-//     sizeCtl = 0，默认值，此时在真正的初始化操作中使用默认容量
-// 但是，通过我对源码的理解，这段注释实际上是有问题的，
-//     有问题的是第二句，sizeCtl = -(1 + nThreads)这个，网上好多都是用第二句的直接翻译去解释代码，这样理解是错误的
-// 默认构造的16个大小的ConcurrentHashMap，只有一个线程执行扩容时，sizeCtl = -2145714174，
-//     但是照这段英文注释的意思，sizeCtl的值应该是 -(1 + 1) = -2
-// sizeCtl在小于0时的确有记录有多少个线程正在执行扩容任务的功能，但是不是这段英文注释说的那样直接用 -(1 + nThreads)
-// 实际中使用了一种生成戳，根据生成戳算出一个基数，不同轮次的扩容操作的生成戳都是唯一的，来保证多次扩容之间不会交叉重叠，
-//     当有n个线程正在执行扩容时，sizeCtl在值变为 (基数 + n)
-// 1.8.0_111的源码的383-384行写了个说明：A generation stamp in field sizeCtl ensures that resizings do not overlap.
 /*
 1. 新建未初始化时，sizeCtl 用于暂存初始容量大小
 2. 初始化时，值为 -1，表示当前集合正在被初始化，其他线程发现该值为 -1 时会让出CPU资源以便初始化操作尽快完成
 3. 初始化完成后，sizeCtl 用于记录当前集合的 threshold
-4. 扩容时，sizeCtl 还记录了当前扩容的并发线程数情况，此时 sizeCtl 的值为：((rs << RESIZE_STAMP_SHIFT) + 2) + (正在扩容的线程数) ，并且该状态下 sizeCtl < 0 。
+4. 扩容时，sizeCtl 用于存储 resizeStamp 和 当前扩容的并发线程数。此时 sizeCtl 的值被置为：((rs << RESIZE_STAMP_SHIFT) + 2) + (正在扩容的线程数)。对容量为16的集合单线程扩容时，sizeCtl 十进制表示为 -2145714174。
+
+   Integer.numberOfLeadingZeros(16) | (1 << (RESIZE_STAMP_BITS - 1)) = 32795，二进制表示为 1000 0000 0001 1011。(rs << RESIZE_STAMP_SHIFT) + 2 = -2145714174，补码为 1000 0000 0001 1011 0000 0000 0000 0010
 */
 private transient volatile int sizeCtl;
  
@@ -374,7 +361,7 @@ static final class TreeBin<K,V> extends Node<K,V> {
         boolean waiting = false;
         for (int s;;) {
             if (((s = lockState) & ~WAITER) == 0) {
-                //s(锁当前状态)仅为 WAITER 时，尝试获取写锁（自己与自己的取反相 & 才为 0）
+                //s(锁当前状态)仅有 WAITER 时，尝试获取写锁（自己与自己的取反相 & 才为 0）
                 if (U.compareAndSwapInt(this, LOCKSTATE, s, WRITER)) {
                     if (waiting) 
                         waiter = null;
@@ -403,7 +390,7 @@ static final class TreeBin<K,V> extends Node<K,V> {
                 int s; K ek;
                 // 两种特殊情况下以链表的方式进行查找
                 // 1、有线程正持有 写锁，这样做能够不阻塞读线程
-                // 2、WAITER时，不再继续加 读锁，能够让已经被阻塞的写线程尽快恢复运行，或者刚好让某个写线程不被阻塞
+                // 2、有线程 WAITER 时，不再继续加 读锁，能够让已经被阻塞的写线程尽快恢复运行，或者刚好让某个写线程不被阻塞
                 if (((s = lockState) & (WAITER|WRITER)) != 0) {
                     if (e.hash == h && ((ek = e.key) == k || (ek != null && k.equals(ek))))
                         return e;
@@ -485,8 +472,15 @@ static final class TreeBin<K,V> extends Node<K,V> {
         return null;
     }
  
-    // 基本是同jdk1.8的HashMap.TreeNode.removeTreeNode，仍然是从链表以及红黑树上都删除节点
-    // 两点区别：1、返回值，红黑树的规模太小时，返回true，调用者再去进行树->链表的转化；2、红黑树规模足够，不用变换成链表时，进行红黑树上的删除要加 写锁
+    /*
+    基本是同jdk1.8的HashMap.TreeNode.removeTreeNode，仍然是从链表以及红黑树上都删除节点
+    
+    两点区别：
+    1、返回值，红黑树的规模太小时，返回true，调用者再去进行树->链表的转化；
+    2、红黑树规模足够，不用变换成链表时，进行红黑树上的删除要加 写锁
+    
+    比普通红黑树删除更复杂的点在于，不能与 next 指针指向的节点交换，因为可能有读线程在使用。
+    */
     final boolean removeTreeNode(TreeNode<K,V> p) {
         TreeNode<K,V> next = (TreeNode<K,V>)p.next;
         TreeNode<K,V> pred = p.prev;  // unlink traversal pointers

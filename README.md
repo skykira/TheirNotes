@@ -98,6 +98,8 @@
 
 - [ConcurrentHashMap 方法总结](https://juejin.im/post/5b001639f265da0b8f62d0f8#comment)
 
+- [LongAdder 解析](https://juejin.im/post/6844903909127880717)
+
 ## 1.3. Reference
 
 - [PhantomReference & Cleaner 的运行原理](https://zhuanlan.zhihu.com/p/29454205)

@@ -17,4 +17,11 @@
 
 2. ConcurrentHashMap
 
-    
+    底层 Node 数组 + 链表，满足条件时，链表树化为红黑树
+
+    负载因子固定为 0.75，首次put时，initTable()初始化，sizeCtl 控制，单线程扩容。
+
+    节点类型有四种，普通链表节点、TreeNode(TreeBin，Node数组通过TreeBin持有红黑树)，ForwardingNode，ReservationNode
+
+    扩容过程：
+        
