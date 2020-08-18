@@ -236,6 +236,15 @@
 
 - [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
 
+  - [concurrent-preclean 和 concurrent-abortable-preclean 两个阶段的作用](https://zhuanlan.zhihu.com/p/150696908)
+
+    YGC 时，卡表的作用是找到跨带引用。此时，卡表的作用是记录并发标记阶段被应用程序并发修改的对象引用。
+
+    preclean 阶段是对这些 card marking 产生的 dirty card 进行 clean，CMS GC 线程会扫描 dirty card 对应的内存区域，更新之前记录的过时的引用信息，并且去掉 dirty card 的标记。
+
+    concurrent-abortable-preclean 用于调度 remark 的开始时机，防止连续 STW。
+
+
 - [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
 
     - [G1 垃圾回收算法总览](https://www.jianshu.com/p/a3e6a9de7a5d)
