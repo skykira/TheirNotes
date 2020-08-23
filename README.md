@@ -114,6 +114,26 @@
 
 - [深入理解Java线程池：ThreadPoolExecutor](http://www.ideabuffer.cn/2017/04/04/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E7%BA%BF%E7%A8%8B%E6%B1%A0%EF%BC%9AThreadPoolExecutor/#addWorker%E6%96%B9%E6%B3%95)
 
+    > *池化思想*用于解决系统资源管理方面的问题，能够降低资源消耗，同时使资源可控。
+    >
+    > 在并发环境下，系统不能够确定在任意时刻中，有多少任务需要执行，有多少资源需要投入。导致以下问题：
+    > 1. 频繁申请销毁调度，给系统带来额外消耗
+    > 2. 对资源无限申请情况，缺少抑制手段
+    > 3. 系统无法合理管理内部资源分布
+
+    流程：
+    未达到 corePoolSize，提交的任务被包装成 Worker，直接运行。否则，提交为任务，等待执行。若是任务队列满了，就添加新的 Worker，到达最大线程容量时，拒绝策略生效。
+
+- [终止线程池原理](https://www.cnblogs.com/trust-freedom/p/6693601.html)
+
+    调用 `shutdown()` 后，会将线程池状态置为 `SHUTDOWN` 并中断所有空闲线程，但正在执行任务的线程不会。
+    
+    `SHUTDOWN` 状态的线程将不再有新的任务加入，之前执行任务的线程执行完任务后，最终会阻塞在获取任务处，导致线程池无法从 `SHUTDOWN` 状态变为结束状态。
+
+    因此，线程池的设计中，Doug Lea 在所有可能导致线程池产终止的地方安插了 `tryTerminated()`，尝试终止线程池，在其中判断如果线程池已经进入终止流程，没有任务等待执行了，但线程池还有线程，便中断唤醒一个空闲线程。当该线程被唤醒继续运行到退出时，会继续传播中断行为。
+
+- [UncaughtExceptionHandler 解析](https://www.jianshu.com/p/f22efc8ef594)
+
 ## 2.1. AQS
 
 - [CLH、MCS队列锁](https://www.cnblogs.com/sanzao/p/10567529.html)
@@ -248,6 +268,8 @@
 - [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
 
     - [G1 垃圾回收算法总览](https://www.jianshu.com/p/a3e6a9de7a5d)
+
+    - [深入理解 G1 的 GC 日志](https://club.perfma.com/article/233563)
 
     - [G1 SATB和 Incremental Update 算法的区别](https://www.jianshu.com/p/8d37a07277e0)
 
@@ -461,6 +483,8 @@
 - [接口自适应类 T$Adaptive 查看](https://blog.csdn.net/swordyijianpku/article/details/105737163?utm_medium=distribute.pc_relevant.none-task-blog-baidujs-2)
 
 # 11. Tomcat
+
+- [Tomcat 架构解析](https://mp.weixin.qq.com/s/fU5Jj9tQvNTjRiT9grm6RA)
 
 - [Tomcat 处理请求过程源码解析](https://blog.csdn.net/leileibest_437147623/article/details/85287568?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
