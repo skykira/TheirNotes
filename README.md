@@ -200,7 +200,7 @@
 
 - [阻塞非阻塞与同步异步的理解](https://www.zhihu.com/question/19732473/answer/88599695)
 
-  [概念理解](https://www.zhihu.com/question/19732473/answer/871835155): 
+  ✨[概念理解](https://www.zhihu.com/question/19732473/answer/871835155): 
   同步异步关注的是，通信双方的协作模式，同步则意味着针对当前业务，双方需要串行进行，异步则可以并行进行。阻塞非阻塞关注的是，调用者的状态，在业务等待期，是阻塞等待还是忙等。
 
   在不同层次，上述概念有不同的表现形式。
@@ -232,7 +232,7 @@
 
 - [Java启动参数 `javaagent` 的使用](https://www.cnblogs.com/rickiyang/p/11368932.html)
 
-- [JVM 创建对象时的快速分配与慢速分配](https://umumble.com/blogs/java/how-does-jvm-allocate-objects%3F/)
+- [JVM 创建对象时的快速分配与慢速分配](https://developer.aliyun.com/article/724637)
 
     JVM 创建对象的过程：
     
@@ -269,6 +269,8 @@
 
     - [G1 垃圾回收算法总览](https://www.jianshu.com/p/a3e6a9de7a5d)
 
+    - [G1 概念理解](https://blog.csdn.net/coderlius/article/details/79272773)
+
     - [深入理解 G1 的 GC 日志](https://club.perfma.com/article/233563)
 
     - [G1 SATB和 Incremental Update 算法的区别](https://www.jianshu.com/p/8d37a07277e0)
@@ -288,6 +290,100 @@
         RSet 是一个 points-into 结构，记录了谁引用了我。
         
         它可以看做一个 Hashtable<key,int[]>。key 为其它 Region，int[] 代表了其它 Region 的 `Card Table`。垃圾收集时，找到 RSet 中指示的区域，作为 GCRoots 的一部分。
+    
+    ✨私人总结：
+    
+    G1 垃圾收集分为两个大部分：
+
+    - 全局并发标记（global concurrent marking）
+    - 对象拷贝清理（evacuation）
+
+        针对不同的选定CSet的模式，分别对应young GC与mixed GC
+      - Young GC：选定所有young gen里的region
+      - Mixed GC：选定所有young gen里的region，外加根据global concurrent marking统计得出收集收益高的若干old gen region
+
+    YGC 日志分析
+    ```java
+    3.378: [GC pause (G1 Evacuation Pause) (young), 0.0015185 secs]
+    //并行阶段
+   [Parallel Time: 0.7 ms, GC Workers: 4]
+   //GC 线程启动
+      [GC Worker Start (ms): Min: 3378.1, Avg: 3378.3, Max: 3378.6, Diff: 0.5]
+      //此活动对堆外的根进行扫描，如JVM系统目录、VM数据结构、JNI线程句柄、硬件寄存器、全局变量、线程栈
+      [Ext Root Scanning (ms): Min: 0.0, Avg: 0.1, Max: 0.2, Diff: 0.2, Sum: 0.6]
+      /*Rset 记录了谁指向我，从而避免了全堆扫描。
+      Rset 的维护包括两个方面，写前栅栏（Pre-Write Barrrier）和写后栅栏（Post-Write Barrrier）。
+      赋值语句后，等式左值修改它的引用到新的对象。左值原来引用的对象失去了一个引用，它所在的区域的 Rset 应当更新。赋值语句后，等式右值获得了左值对它的引用，因此右值所在区域的 Rset 需要更新。
+      但处于性能考虑，RSet 不会立刻被被更新，而是后续通过日志来更新。
+      写前栅栏还用于实现 SATB，写后栅栏还用于维护 Card Table。
+      */
+      //并发优化线程更新 RSet
+      [Update RS (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.0]
+        //并发优化线程（Concurrence Refinement Threads）专注于通过扫描日志缓冲区记录的 dirty card 来更新 RSet
+         [Processed Buffers: Min: 0, Avg: 0.2, Max: 1, Diff: 1, Sum: 1]
+      //在收集当前 CSet 之前，考虑到分区外的引用，必须扫描 CSet 分区的 RSet。
+      [Scan RS (ms): Min: 0.0, Avg: 0.1, Max: 0.1, Diff: 0.1, Sum: 0.3]
+      //扫描 JVM 编译后代码（Native Method）的引用信息
+      [Code Root Scanning (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.0]
+      //对象拷贝，执行CSet 分区存活对象的转移、CSet 分区空间的回收
+      [Object Copy (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.1]
+      //完成上述任务后，如果任务队列已空，则工作线程会发起终止要求。
+      [Termination (ms): Min: 0.0, Avg: 0.2, Max: 0.3, Diff: 0.3, Sum: 0.7]
+         [Termination Attempts: Min: 1, Avg: 1.0, Max: 1, Diff: 0, Sum: 4]
+      [GC Worker Other (ms): Min: 0.0, Avg: 0.0, Max: 0.0, Diff: 0.0, Sum: 0.1]
+      [GC Worker Total (ms): Min: 0.1, Avg: 0.4, Max: 0.6, Diff: 0.6, Sum: 1.8]
+      [GC Worker End (ms): Min: 3378.7, Avg: 3378.7, Max: 3378.8, Diff: 0.1]
+    //对象拷贝后，引用有所变化。此处，把嵌在代码里的引用修正到evacuate之后新对象的位置
+   [Code Root Fixup: 0.0 ms]
+   //把不再引用某个region的nmethod从RSet里记录的code roots清除掉的动作
+   [Code Root Purge: 0.0 ms]
+   //在任意收集周期会扫描 CSet 与 RSet 记录的 PRT(per region table)，扫描时会在全局卡片表中进行标记，防止重复扫描。在收集周期的最后将会清除全局卡片表中的已扫描标志。
+   [Clear CT: 0.1 ms]
+   [Other: 0.7 ms]
+      //主要用于并发标记周期后的年轻代收集、以及混合收集中，在这些收集过程中，由于有老年代候选分区的加入，往往需要对下次收集的范围做出界定；但单纯的年轻代收集中，所有收集的分区都会被收集，不存在选择。
+      [Choose CSet: 0.0 ms]
+      [Ref Proc: 0.5 ms]
+      [Ref Enq: 0.0 ms]
+      [Redirty Cards: 0.1 ms]
+      [Humongous Register: 0.0 ms]
+      [Humongous Reclaim: 0.1 ms]
+      [Free CSet: 0.1 ms]
+   [Eden: 304.0M(304.0M)->0.0B(304.0M) Survivors: 2048.0K->2048.0K Heap: 304.5M(512.0M)->529.0K(512.0M)]
+ [Times: user=0.01 sys=0.00, real=0.00 secs] 
+    ```
+
+    Mixed GC 日志分析(过程与 YGC 完全一致，只是范围不一致)
+
+    ```java
+    29.268: [GC pause (G1 Evacuation Pause) (mixed), 0.0059011 secs]
+   [Parallel Time: 5.6 ms, GC Workers: 4]
+      ... ...
+   [Code Root Fixup: 0.0 ms]
+   [Code Root Purge: 0.0 ms]
+   [Clear CT: 0.1 ms]
+   [Other: 0.3 ms]
+      ... ...
+   [Eden: 14.0M(14.0M)->0.0B(156.0M) Survivors: 10.0M->4096.0K Heap: 165.9M(512.0M)->148.7M(512.0M)]
+ [Times: user=0.02 sys=0.01, real=0.00 secs] 
+    ```
+
+    Concurrent marking cycle 并发标记周期
+
+    ```java
+    //这一行日志是全局并发标记的第一个阶段，即初始化标记，是伴随YGC一起发生的，后面的857M->617M表示YGC发生前后堆内存变化，0.0112237表示YGC的耗时
+    [GC pause (G1 Evacuation Pause) (young) (initial-mark) 857M->617M(1024M), 0.0112237 secs]
+    //开始并发ROOT区域扫描。扫描的 Suvivor 分区也被称为根分区（Root Region）
+    [GC concurrent-root-region-scan-start]
+    //结束并发ROOT区域扫描，并统计这个阶段的耗时
+    [GC concurrent-root-region-scan-end, 0.0000525 secs]
+    [GC concurrent-mark-start]
+    [GC concurrent-mark-end, 0.0083864 secs]
+    //最终标记阶段完成并发标记阶段后遗留的工作，即SATB buffer处理，并统计这个阶段耗时
+    [GC remark, 0.0038066 secs]
+    //清理阶段会根据所有Region标记信息，计算出每个Region存活对象信息，并且把Region根据GC回收效率排序
+    [GC cleanup 680M->680M(1024M), 0.0006165 secs]
+    ```
+    
 
 - [ZGC 的特点](https://mp.weixin.qq.com/s/KUCs_BJUNfMMCO1T3_WAjw)
 

@@ -43,3 +43,7 @@
             1. - 调大新生代空间或提高新生代晋升阈值 - 提前老年代垃圾收集时机（-XX:CMSInitiatingOccupancyFraction=68 （默认是 68））
             2. - 增大老年代空间 - -XX:CMSFullGCBeforeCompaction=n 在进行 n 次，CMS 后，进行一次压缩的 Full GC，用以减少 CMS 产生的碎片
 
+
+4. G1 垃圾收集
+
+    
