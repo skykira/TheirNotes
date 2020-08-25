@@ -70,7 +70,7 @@
 
     - [CGLib 动态代理](https://dannashen.github.io/2019/05/09/Cglib%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86/)
 
-        拦截器中对被拦截方法的调用通过 `proxy.invokeSuper(obj, args);` 完成，相当于子类直接调用父类，比 `invokeHandler` 的反射调用快些，量大的话。
+        拦截器中对被拦截方法的调用通过 `proxy.invokeSuper(obj, args);` 完成，相当于子类直接调用父类。
 
 - [检查型异常与非检查型异常](https://blog.csdn.net/u013630349/article/details/50850880)
 
@@ -475,7 +475,7 @@
 
 ## 9.1. 源码解析
 
-- [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/8SpwGLMn_ewmT7h6Cn88_Q)
+- [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/5UvbeEnZBS7niAJw_f-6pQ) 
 
     由 `ConfigurationClassPostProcessor` 完成对配置类的代理操作
 
