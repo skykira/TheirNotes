@@ -349,7 +349,7 @@
       [Humongous Reclaim: 0.1 ms]
       [Free CSet: 0.1 ms]
    [Eden: 304.0M(304.0M)->0.0B(304.0M) Survivors: 2048.0K->2048.0K Heap: 304.5M(512.0M)->529.0K(512.0M)]
- [Times: user=0.01 sys=0.00, real=0.00 secs] 
+    [Times: user=0.01 sys=0.00, real=0.00 secs] 
     ```
 
     Mixed GC 日志分析(过程与 YGC 完全一致，只是范围不一致)
@@ -364,7 +364,7 @@
    [Other: 0.3 ms]
       ... ...
    [Eden: 14.0M(14.0M)->0.0B(156.0M) Survivors: 10.0M->4096.0K Heap: 165.9M(512.0M)->148.7M(512.0M)]
- [Times: user=0.02 sys=0.01, real=0.00 secs] 
+    [Times: user=0.02 sys=0.01, real=0.00 secs] 
     ```
 
     Concurrent marking cycle 并发标记周期
@@ -475,7 +475,7 @@
 
 ## 9.1. 源码解析
 
-- [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/5UvbeEnZBS7niAJw_f-6pQ) 
+- [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/5UvbeEnZBS7niAJw_f-6pQ) [](https://juejin.im/post/6860387888413343757)
 
     由 `ConfigurationClassPostProcessor` 完成对配置类的代理操作
 
@@ -486,7 +486,7 @@
         3. 代理类自带两个拦截器
            -  `new BeanMethodInterceptor()`
                 
-                代理 `beanMethod` 方法，控制 bean 的创建或获取。只有第一次调用调用原方法，后续从 `beanFactory` 中获取 `bean`
+                代理 `beanMethod` 方法，控制 bean 的创建或获取。只有第一次调用调用原方法，后续从 `beanFactory` 中获取 `bean`。用配置类中的 BeanMethod 时，当前执行方法非调用方法时(外层第一层为调用方法)，需要调用beanFactory.getBean()获得。
 
            -  `new BeanFactoryAwareMethodInterceptor()`
 
