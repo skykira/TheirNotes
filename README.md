@@ -473,6 +473,8 @@
 
 - [`$$` 与 `<generated>` 代表的含义](https://stackoverflow.com/questions/33605246/what-does-and-generated-means-in-java-stacktrace)
 
+- [RootBeanDefinition与GenericBeanDefinition](https://www.cnblogs.com/chwy/p/13514589.html)
+
 ## 9.1. 源码解析
 
 - [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/5UvbeEnZBS7niAJw_f-6pQ) [](https://juejin.im/post/6860387888413343757)
@@ -519,7 +521,7 @@
         - AOP 可在此时返回新的 bean 实例
     11. 调用 `DestructionAwareBeanPostProcessor` 的 `requiresDestruction` 方法, 判断时候需要注册 bean 销毁逻辑
 
-- [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://segmentfault.com/a/1190000022425759)
+- [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://blog.csdn.net/f641385712/article/details/88041409)
 
 - [Spring代理创建及 AOP 链式调用过程](https://blog.csdn.net/l6108003/article/details/106577515)
 
@@ -559,7 +561,7 @@
     2. populateBean 填充 C 属性 D
     3. getBean -> doGetBean -> createBean -> doCreateBean 获取 D，创建原始bean `d`，将 d 加入三级缓存 `singletonFactories` 中
     4. populateBean 填充 D 属性 C
-    5. doGetBean 时，从三级缓存中获取 c 的早期引用。假设有切面，此时经过后置处理器生成 `c` 的代理类对象（一号），@Transactional 注解生成代理也是通过插入切面来完成的，不会额外创建代理。代理类 `c`（一号） 赋给了 `d`
+    5. doGetBean 时，从三级缓存中获取 c 的早期引用。假设有切面，此时经过后置处理器 `AbstractAutoProxyCreator` 的 `getEarlyBeanReference()` 生成 `c` 的代理类对象（一号），@Transactional 注解生成代理也是通过插入切面来完成的，不会额外创建代理。代理类 `c`（一号） 赋给了 `d`
     6. initializeBean 初始化 `d`，有切面，生成代理类 `d`。然后经过 @Async 的后置处理器时，@Async 的后置处理器做了判断，如果传入的是代理类，则直接将增强添加到当前代理中，不会重新创建新的代理类。最终 d 初始化完成，成为代理类 `d`。`d` 没有暴露早期引用，无需进行循环依赖检查。
     7. 代理类 `d` 赋值给了 `c`
     8. initializeBean 初始化 `c`，因为暴露早期引用时已经进行过切面代理，不再进行代理，然后就返回了原始 `c`！然后经过 @Async 的后置处理器时，因为 @Async 并没有实现早期引用逻辑，此时需要对原始 `c` 进行代理，生成代理类 `c`(二号)。
