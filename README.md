@@ -572,7 +572,7 @@
 
 ### 9.2.1. `PostProcessor` bean 后置处理器
 
-- [`AbstractAdvisorAutoProxyCreator` 决定是否要对当前 bean 进行代理](https://blog.csdn.net/z69183787/article/details/83311522)
+- [`AbstractAdvisorAutoProxyCreator` 决定是否要对当前 bean 进行代理](https://www.cnblogs.com/zcmzex/p/8822509.html)
 
     > spring 依赖注入时，什么时候会创建代理类，什么时候是普通 bean？
 
