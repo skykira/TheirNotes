@@ -516,7 +516,7 @@
     7. 调用 bean 前置处理器, `BeanPostProcessor` 的 `postProcessBeforeInitialization()`
         - 此时会执行 `@PostConstruct`
     8. bean 初始化，若是 InitializingBean, 调用 `afterPropertiesSet()`
-    9.  调用自定义 `init-method`
+    9.  调用自定义 `init-method`，如果是 `InitializingBean` 还会调用其 `afterPropertiesSet()` 方法。
     10. 调用 bean 后置处理器, `BeanPostProcessor` 的 `postProcessAfterInitialization()`
         - AOP 可在此时返回新的 bean 实例
     11. 调用 `DestructionAwareBeanPostProcessor` 的 `requiresDestruction` 方法, 判断时候需要注册 bean 销毁逻辑
@@ -572,6 +572,10 @@
     
     - [@Lazy 解除循环依赖](https://www.cnblogs.com/yangxiaohui227/p/10523025.html)
 
+- [@RequestMapping 映射关系]()
+
+    `RequestMappingHandlerMapping` 的 `afterPropertiesSet()` 开启映射关系的处理。`isHandler()` 方法判断，只有标有 @Controller 或 @RequestMapping 的 bean 才会被扫描。
+
 ## 9.2. 关键组件
 
 ### 9.2.1. `PostProcessor` bean 后置处理器
@@ -583,6 +587,12 @@
 # 10. Dubbo
 
 - [接口自适应类 T$Adaptive 查看](https://blog.csdn.net/swordyijianpku/article/details/105737163?utm_medium=distribute.pc_relevant.none-task-blog-baidujs-2)
+
+    根据url中的参数，在运行时加载 SPI 扩展类
+
+- [接口 Wrapper 类查看](https://www.jianshu.com/p/57d53ff17062)
+
+    可以通过生成的 Wrapper 子类，调用接口实现类的方法，相当于反射调用的另一种实现。
 
 # 11. Tomcat
 
