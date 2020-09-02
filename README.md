@@ -12,6 +12,7 @@
 - [5. 函数式编程](#5-函数式编程)
 - [6. JVM](#6-jvm)
   - [6.1. 垃圾收集](#61-垃圾收集)
+  - [ZGC](#zgc)
   - [6.2. 字节码操作](#62-字节码操作)
   - [6.3. 调优](#63-调优)
 - [7. 分布式](#7-分布式)
@@ -19,7 +20,10 @@
   - [7.2. BFT](#72-bft)
   - [7.3. 分布式锁](#73-分布式锁)
     - [7.3.1. Redis 分布式锁](#731-redis-分布式锁)
+  - [分布式事务](#分布式事务)
+  - [缓存一致性](#缓存一致性)
 - [8. DateBase](#8-datebase)
+  - [innodb 关键特性](#innodb-关键特性)
 - [9. Spring](#9-spring)
   - [9.1. 源码解析](#91-源码解析)
   - [9.2. 关键组件](#92-关键组件)
@@ -31,6 +35,7 @@
 - [14. Linux](#14-linux)
 - [15. 编程基础](#15-编程基础)
 - [16. 数据结构](#16-数据结构)
+- [工具包](#工具包)
 
 <!-- /TOC -->
 
@@ -101,6 +106,8 @@
 - [LongAdder 解析](https://juejin.im/post/6844903909127880717)
 
 ## 1.3. Reference
+
+- [Java Reference核心原理分析](https://mp.weixin.qq.com/s/8f29ZfGvZVPe0bO-FahokQ)
 
 - [PhantomReference & Cleaner 的运行原理](https://zhuanlan.zhihu.com/p/29454205)
 
@@ -383,9 +390,11 @@
     //清理阶段会根据所有Region标记信息，计算出每个Region存活对象信息，并且把Region根据GC回收效率排序
     [GC cleanup 680M->680M(1024M), 0.0006165 secs]
     ```
-    
+## ZGC
 
-- [ZGC 的特点](https://mp.weixin.qq.com/s/KUCs_BJUNfMMCO1T3_WAjw)
+- [ZGC 读屏障过程](https://zhuanlan.zhihu.com/p/43608166)
+
+    通过染色指针技术和读屏障，使得用户线程在读对象时能够总是读取到对象最新的引用。
 
 - [Full GC 时新生代的垃圾收集方式](https://www.zhihu.com/question/62604570/answer/201129934)
 
@@ -414,6 +423,8 @@
 
 ## 7.1. Raft
 
+- [Raft 论文翻译](https://github.com/maemual/raft-zh_cn/blob/master/raft-zh_cn.md)
+
 - [客户端只读请求的处理](https://zhuanlan.zhihu.com/p/36592467)
 
 ## 7.2. BFT
@@ -433,6 +444,20 @@
     这是一种典型的[租约机制](https://zhuanlan.zhihu.com/p/101913195)。
 
     > 锁的失效时间设置是个纠结的问题。当用户并不知道自己将会用多久的锁时，我们为该锁设置一个较小的租期，同时每隔一段时间，在该锁过期之前，自动续租。用户获得锁后，可以启动一个后台线程，周期性查询用户是否还持有锁，持有则续期。
+
+## 分布式事务
+
+- [二阶段提交协议](https://mp.weixin.qq.com/s/Ixurn9kUBhnVZjrWxVpBTg)
+
+    2PC 存在单点故障，当协调者在提交阶段开始时宕机，参与者将被无限期阻塞。
+
+    为了解决这个同步阻塞的问题，3PC 在参与者中也引入了超时机制——超时未收到 doCommit 消息，便自动提交。如此定会有一致性问题出现，所以 3PC 又多加了一个 canCommit 阶段，当改阶段确认通过后，后续失败的概率会降低，以此通过牺牲一定的一致性，提高了可用性。
+
+    2PC 这个分布式事务协议通常是在 DB 层面实现，TCC 则相当于应用层面的 2PC，通过业务逻辑实现，能够允许程序自定义数据库操作粒度。
+
+## 缓存一致性
+
+- [数据库和缓存双写一致性](https://www.cnblogs.com/rjzheng/p/9041659.html?spm=a2c6h.12873639.0.0.2020fe8dqb3Ls4)
 
 # 8. DateBase
 
@@ -455,6 +480,16 @@
 - [ICP 索引下推](https://database.51cto.com/art/201907/599968.htm)
 
     针对辅助索引能覆盖到的列，将 where 条件的判断下推到存储引擎层。
+
+- [Mysql 意向锁](https://blog.csdn.net/zcl_love_wx/article/details/82015281)
+
+    意向锁是表级锁，申请行级锁时，由数据库自动提前申请，保证了行级锁与表级锁的共存。
+
+## innodb 关键特性
+
+- [channge buffer](https://dev.mysql.com/doc/refman/8.0/en/innodb-change-buffer.html)
+
+    在内存中，`channge buffer` 占用了缓冲池的一部分。在磁盘上，`channge buffer` 是系统表空间的一部分，当数据库服务器关闭时，对辅助索引的更改将存储在其中。
 
 # 9. Spring
 
@@ -706,5 +741,7 @@
 - [红黑树工具](https://rbtree.phpisfuture.com/)
 
 - [红黑树与 AVL 树比较](https://www.zhihu.com/question/19856999/answer/1254240739)
+
+# 工具包
 
 - [原码补码工具](http://www.atoolbox.net/Tool.php?Id=952)
