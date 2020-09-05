@@ -26,8 +26,6 @@
   - [innodb 关键特性](#innodb-关键特性)
 - [9. Spring](#9-spring)
   - [9.1. 源码解析](#91-源码解析)
-  - [9.2. 关键组件](#92-关键组件)
-    - [9.2.1. `PostProcessor` bean 后置处理器](#921-postprocessor-bean-后置处理器)
 - [10. Dubbo](#10-dubbo)
 - [11. Tomcat](#11-tomcat)
 - [12. Netty](#12-netty)
@@ -262,6 +260,8 @@
 ## 6.1. 垃圾收集
 
 - [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
+
+  - [CMS GC日志分析](https://www.cnblogs.com/zhangxiaoguang/p/5792468.html)
 
   - [concurrent-preclean 和 concurrent-abortable-preclean 两个阶段的作用](https://zhuanlan.zhihu.com/p/150696908)
 
@@ -551,7 +551,7 @@
     7. 调用 bean 前置处理器, `BeanPostProcessor` 的 `postProcessBeforeInitialization()`
         - 此时会执行 `@PostConstruct`
     8. bean 初始化，若是 InitializingBean, 调用 `afterPropertiesSet()`
-    9.  调用自定义 `init-method`，如果是 `InitializingBean` 还会调用其 `afterPropertiesSet()` 方法。
+    9. 调用自定义 `init-method`。
     10. 调用 bean 后置处理器, `BeanPostProcessor` 的 `postProcessAfterInitialization()`
         - AOP 可在此时返回新的 bean 实例
     11. 调用 `DestructionAwareBeanPostProcessor` 的 `requiresDestruction` 方法, 判断时候需要注册 bean 销毁逻辑
@@ -611,10 +611,6 @@
 
     `RequestMappingHandlerMapping` 的 `afterPropertiesSet()` 开启映射关系的处理。`isHandler()` 方法判断，只有标有 @Controller 或 @RequestMapping 的 bean 才会被扫描。
 
-## 9.2. 关键组件
-
-### 9.2.1. `PostProcessor` bean 后置处理器
-
 - [`AbstractAdvisorAutoProxyCreator` 决定是否要对当前 bean 进行代理](https://www.cnblogs.com/zcmzex/p/8822509.html)
 
     > spring 依赖注入时，什么时候会创建代理类，什么时候是普通 bean？
@@ -628,6 +624,8 @@
 - [接口 Wrapper 类查看](https://www.jianshu.com/p/57d53ff17062)
 
     可以通过生成的 Wrapper 子类，调用接口实现类的方法，相当于反射调用的另一种实现。
+
+- ReferenceAnnotationBeanPostProcessor 继承 AnnotationInjectedBeanPostProcessor<Reference> 完成Reference 属性注入。
 
 # 11. Tomcat
 
