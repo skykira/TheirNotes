@@ -32,6 +32,7 @@
 - [13. Kafka](#13-kafka)
 - [14. Linux](#14-linux)
 - [15. 编程基础](#15-编程基础)
+  - [TCP](#tcp)
 - [16. 数据结构](#16-数据结构)
 - [工具包](#工具包)
 
@@ -485,6 +486,10 @@
 
     意向锁是表级锁，申请行级锁时，由数据库自动提前申请，保证了行级锁与表级锁的共存。
 
+- [水平分库扩展](https://www.cnblogs.com/barrywxx/p/11532122.html)
+
+    成倍扩容，提前双写。
+
 ## innodb 关键特性
 
 - [channge buffer](https://dev.mysql.com/doc/refman/8.0/en/innodb-change-buffer.html)
@@ -625,7 +630,13 @@
 
     可以通过生成的 Wrapper 子类，调用接口实现类的方法，相当于反射调用的另一种实现。
 
-- ReferenceAnnotationBeanPostProcessor 继承 AnnotationInjectedBeanPostProcessor<Reference> 完成Reference 属性注入。
+- ReferenceAnnotationBeanPostProcessor 继承 AnnotationInjectedBeanPostProcessor<Reference> 完成 Reference 属性注入。
+
+- ServiceAnnotationBeanPostProcessor 继承 BeanDefinitionRegistryPostProcessor 完成 @Service(指 com.alibaba.dubbo.config.annotation.Service) 注释类的扫描，并将构建对应的 ServiceBean 的 BeanDefinition 注入到 Spring 容器中，当实例化 bean 时，将对 ServiceBean 进行属性注入（比如，ref 属性）。
+
+- [dubbo Filter 之 ContextFilter](https://blog.csdn.net/yuanshangshenghuo/article/details/107722549)
+
+    通过 ContextFilter 对 Invocation 中的 attachments 与 RpcContext 中的 LOCAL/SERVER_LOCAL 进行消息传递。
 
 # 11. Tomcat
 
@@ -663,7 +674,7 @@
   - [简述 Linux IO 模型](https://mp.weixin.qq.com/s/3C7Iv1jof8jitOPL_4c_bQ)
   - [详述 Linux IO 模型](https://www.jianshu.com/p/486b0965c296)
 
-- [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)
+- [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)[](https://wenchao.ren/2019/07/Select%E3%80%81Epoll%E3%80%81KQueue%E5%8C%BA%E5%88%AB/)
 
 - [Linux 零拷贝技术](https://mp.weixin.qq.com/s/0SHaQBgMJ4MlKjX6m08EpQ)
 
@@ -722,13 +733,38 @@
     
     - [正则表达式参考文档](http://notes.tanchuanqi.com/tools/regex.html)
 
+- 将 javassist 动态生成的类打印出来
+
+    `(ClassGenerator)ccp.getClassPool().get("com.alibaba.dubbo.common.bytecode.Proxy0").debugWriteFile()`
+
+## TCP
+
 - [TCP/IP 三次握手思考](https://blog.csdn.net/lengxiao1993/article/details/82771768?utm_medium=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
 - [TCP/IP 四次挥手](https://blog.csdn.net/ThinkWon/article/details/104903925?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase)
 
-- 将 javassist 动态生成的类打印出来
+- [TCP 半连接和全连接](http://jm.taobao.org/2017/05/25/525-1/)
 
-    `(ClassGenerator)ccp.getClassPool().get("com.alibaba.dubbo.common.bytecode.Proxy0").debugWriteFile()`
+    Syn Queue 为半连接队列，等待 server accept；Accept Queue 为全连接队列，存储完成了三次握手的连接。
+
+    调用命令 ss -lnts 可以查看 Socket 连接情况：
+
+    - 当连接处于Listening状态时，Recv-Q表示全连接队列实际使用情况，Send-Q表示全连接队最大容量。
+    - 当连接处于非Listening状态时，Recv-Q表示接受缓冲区还没有读取的数据大小，Send-Q表示发送缓冲区还没有被对端ACK的数据大小。
+
+- [Socket 端口复用](https://bbs.csdn.net/topics/390945826)
+
+    一般 TCP 的 SO_REUSEADDR 用于服务器，以便服务器崩溃重启时，可直接 Bind 处于 TIME_WAIT 状态的端口。
+
+    对于 TCP，我们不可能启动捆绑相同 IP 地址和相同端口号的多个服务器。
+
+    端口复用时，只有一个Socket可以得到数据。
+
+- [多个 Socket 监听同一端口](https://blog.51cto.com/ticktick/779866)[](https://stackoverflow.com/questions/3329641/how-do-multiple-clients-connect-simultaneously-to-one-port-say-80-on-a-server)[](https://blog.csdn.net/u011580175/article/details/80306414)
+
+    一个进程可以与多个套接字关联，两个独立的进程不可以侦听同一端口。
+    
+    服务器可以使用多个子进程/线程为每个套接字提供服务。操作系统（特别是UNIX）在设计上允许子进程从父进程继承所有文件描述符（FD）。因此，只要进程通过父子关系与A相关联，便可以由更多进程A1，A2..监听进程A侦听的所有套接字。
 
 # 16. 数据结构
 
