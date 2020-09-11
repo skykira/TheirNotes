@@ -490,6 +490,11 @@
 
     成倍扩容，提前双写。
 
+- [in 和 exist 区别](https://blog.csdn.net/lick4050312/article/details/4476333)
+
+    in 会缓存表达式中的数据，是在内存中操作，但需要遍历 B 表。
+    exist 不会缓存数据，但对于 A 中的每一条数据并不需要遍历 B 表。
+
 ## innodb 关键特性
 
 - [channge buffer](https://dev.mysql.com/doc/refman/8.0/en/innodb-change-buffer.html)
@@ -619,6 +624,12 @@
 - [`AbstractAdvisorAutoProxyCreator` 决定是否要对当前 bean 进行代理](https://www.cnblogs.com/zcmzex/p/8822509.html)
 
     > spring 依赖注入时，什么时候会创建代理类，什么时候是普通 bean？
+
+- [Spring TargetSource](https://blog.csdn.net/shenchaohao12321/article/details/85538163)
+
+    代理类 JdkDynamicAopProxy 的 AdvisedSupport 持有代理目标相关的信息。
+    
+    在 AOP 链式调用开始执行时，通过 `targetSource.getTarget()` 获得真正的目标对象 target。通过这种机制使得方法调用变得灵活,可以扩展出很多高级功能,如:target pool(目标对象池)、hot swap(运行时目标对象热替换)。
 
 # 10. Dubbo
 
