@@ -34,6 +34,7 @@
 - [15. 编程基础](#15-编程基础)
   - [TCP](#tcp)
 - [16. 数据结构](#16-数据结构)
+- [设计模式](#设计模式)
 - [工具包](#工具包)
 
 <!-- /TOC -->
@@ -520,6 +521,8 @@
 
 - [RootBeanDefinition与GenericBeanDefinition](https://www.cnblogs.com/chwy/p/13514589.html)
 
+- [ApplicationContext 的继承体系](https://zhuanlan.zhihu.com/p/210268684)
+
 ## 9.1. 源码解析
 
 - [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/5UvbeEnZBS7niAJw_f-6pQ) [](https://juejin.im/post/6860387888413343757)
@@ -555,16 +558,24 @@
    
     2. bean 实例化
     3. `MergedBeanDefinitionPostProcessor` 的 `postProcessMergedBeanDefinition()` 方法
+
+       - CommonAnnoatationBeanPostProcessor 执行时，首先调用父类 InitDestroyAnnotationBeanPostProcessor 的此方法，它解析和初始化（@PostConstruct）和销毁（@PreDestory）相关的注解并缓存到 lifecycleMetadataCache 中。父类完成后，它本身负责缓存 @Resource 注解的资源
+
     4. 执行 bean 实例化后置处理器, `InstantiationAwareBeanPostProcessor` 的 `postProcessAfterInstantiation()` 方法
     5. 属性值注入前，进行处理`InstantiationAwareBeanPostProcessor` 的 `postProcessPropertyValues()` 方法
     6. 应用属性值，解析属性值中的 bean 引用, 未加载的去加载
     7. 调用 bean 前置处理器, `BeanPostProcessor` 的 `postProcessBeforeInitialization()`
         - 此时会执行 `@PostConstruct`
     8. bean 初始化，若是 InitializingBean, 调用 `afterPropertiesSet()`
-    9. 调用自定义 `init-method`。
+    9.  调用自定义 `init-method`。
     10. 调用 bean 后置处理器, `BeanPostProcessor` 的 `postProcessAfterInitialization()`
         - AOP 可在此时返回新的 bean 实例
     11. 调用 `DestructionAwareBeanPostProcessor` 的 `requiresDestruction` 方法, 判断时候需要注册 bean 销毁逻辑
+
+- [`prepareContext() 方法`](https://www.cnblogs.com/youzhibing/p/9697825.html)
+
+    1. 将 context 中的 environment 替换成 SpringApplication 中创建的 environment
+    2. 生成 Application 主类的 BeanDefinition，并注册到 BeanDefinitionMap
 
 - [`AbstractApplicationContext` 的 `refresh()` 方法源码解析](https://blog.csdn.net/f641385712/article/details/88041409)
 
@@ -733,6 +744,7 @@
 
         通过缓冲区池，它能被同时映射到用户空间（user space）和内核态（kernel space），完全省去了拷贝。
 
+- [Linux中的文件描述符与打开文件之间的关系](https://blog.csdn.net/cywosp/article/details/38965239)
 
 # 15. 编程基础
 
@@ -786,6 +798,14 @@
 - [红黑树工具](https://rbtree.phpisfuture.com/)
 
 - [红黑树与 AVL 树比较](https://www.zhihu.com/question/19856999/answer/1254240739)
+
+# 设计模式
+
+- 简单工厂模式、工厂方法模式、抽象工厂模式
+
+    1. 简单工厂封装了创建对象的过程，调用就生产产品 A；
+    2. 工厂方法模式封装了多个简单工厂，可以根据入参，生产不同的产品 A、B；
+    3. 抽象工厂封装了工厂方法，可以根据入参，返回不同的工厂。
 
 # 工具包
 
