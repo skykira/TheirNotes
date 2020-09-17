@@ -23,7 +23,7 @@
   - [分布式事务](#分布式事务)
   - [缓存一致性](#缓存一致性)
 - [8. DateBase](#8-datebase)
-  - [innodb 关键特性](#innodb-关键特性)
+  - [innodb 存储引擎](#innodb-存储引擎)
 - [9. Spring](#9-spring)
   - [9.1. 源码解析](#91-源码解析)
 - [10. Dubbo](#10-dubbo)
@@ -496,11 +496,21 @@
     in 会缓存表达式中的数据，是在内存中操作，但需要遍历 B 表。
     exist 不会缓存数据，但对于 A 中的每一条数据并不需要遍历 B 表。
 
-## innodb 关键特性
-
 - [channge buffer](https://dev.mysql.com/doc/refman/8.0/en/innodb-change-buffer.html)
 
     在内存中，`channge buffer` 占用了缓冲池的一部分。在磁盘上，`channge buffer` 是系统表空间的一部分，当数据库服务器关闭时，对辅助索引的更改将存储在其中。
+
+## innodb 存储引擎
+
+- 独立表空间的物理结构
+
+    表空间由区构成，每256个区组成一个组，段是一个逻辑概念，每个区包含64个页。
+
+    每个索引包含两个段，叶子段和非叶子段。段由区的链表构成，由元数据结构 INODE Entry 描述，该结构持有链表的起始节点以及段中位于碎片区的页的定位。
+
+    段的元数据结构 INODE Entry 统一存储于表空间第一个区的第三个页面，该页面类型为 INODE 类型，多个此类页面由链表相连接。
+
+    每个组的第一个区的第一个页中，存储了该组内 256 个区对应的元数据结构 XDES Entry，每个 XDES Entry 中有每个区内 64 个页是否空闲的 bitmap。
 
 # 9. Spring
 
