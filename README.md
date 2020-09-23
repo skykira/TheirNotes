@@ -479,9 +479,9 @@
 
 - [Innodb 双写防止 `partial page write`](https://blog.csdn.net/jolly10/article/details/79791574)
 
-- [ICP 索引下推](https://database.51cto.com/art/201907/599968.htm)
+- [ICP(Index Condition Pushdown) 索引下推](https://database.51cto.com/art/201907/599968.htm)
 
-    针对辅助索引能覆盖到的列，将 where 条件的判断下推到存储引擎层。
+    针对辅助索引能覆盖到的列，将 where 条件的判断下推到存储引擎层。也就是，覆盖索引中，本来使用不到索引的过滤条件，在回表前提前完成了过滤，即为索引条件下推。
 
 - [Mysql 意向锁](https://blog.csdn.net/zcl_love_wx/article/details/82015281)
 
@@ -500,6 +500,10 @@
 
     在内存中，`channge buffer` 占用了缓冲池的一部分。在磁盘上，`channge buffer` 是系统表空间的一部分，当数据库服务器关闭时，对辅助索引的更改将存储在其中。
 
+- [LSN](https://www.cnblogs.com/drizzle-xu/p/9713378.html)
+
+    系统最大 LSN > redo 日志中的 > 脏页中的 > checkpoint 中的
+
 ## innodb 存储引擎
 
 - 独立表空间的物理结构
@@ -511,6 +515,21 @@
     段的元数据结构 INODE Entry 统一存储于表空间第一个区的第三个页面，该页面类型为 INODE 类型，多个此类页面由链表相连接。
 
     每个组的第一个区的第一个页中，存储了该组内 256 个区对应的元数据结构 XDES Entry，每个 XDES Entry 中有每个区内 64 个页是否空闲的 bitmap。
+
+    每个索引两个段，索引的根页面的 Page Header 部分的两个 Segment Header 结构存储了指向该索引两个段的指针。另，在系统表空间第一个区的第七个页 Data Directory Header 中，存储了各个索引的元数据信息，其中包含了索引的根页面位置。
+
+    因此，从数据字典的索引表中，找到索引根页面的位置，然后得到索引两个段的 INODE Entry 的位置，然后可以寻得该段内所有区或者零碎页。
+
+- in 子查询转化为 semi join 的实现方法
+
+    1. table pullout 子查询表搜索条件只有主键或者唯一索引列时，因为不会出现重复，可以直接转为内连接
+
+    2. duplicate weedout 对半连接后的结果集，构建临时表，消除重复
+    3. LooseScan 如果将子查询表作为驱动表，且能够使用到该表的索引时，可以只取相同索引值第一个，相当于分组，然后进行内连接
+    4. Semi-join Materialization 为子查询建立物理表，然后内连接
+    5. FirstMatch 外层表的每一条数据，与内层表进行匹配，匹配成功一次，便不再仅需进行匹配
+
+- [InnoDB recovery过程解析](https://sq.163yun.com/blog/article/172546631668785152)
 
 # 9. Spring
 
