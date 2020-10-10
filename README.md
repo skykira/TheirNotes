@@ -21,7 +21,7 @@
   - [7.3. 分布式锁](#73-分布式锁)
     - [7.3.1. Redis 分布式锁](#731-redis-分布式锁)
   - [分布式事务](#分布式事务)
-  - [缓存一致性](#缓存一致性)
+  - [缓存](#缓存)
 - [8. DateBase](#8-datebase)
   - [innodb 存储引擎](#innodb-存储引擎)
 - [9. Spring](#9-spring)
@@ -35,6 +35,8 @@
   - [TCP](#tcp)
 - [16. 数据结构](#16-数据结构)
 - [设计模式](#设计模式)
+- [解决方案](#解决方案)
+  - [SSO 统一登录](#sso-统一登录)
 - [工具包](#工具包)
 
 <!-- /TOC -->
@@ -457,9 +459,15 @@
 
     2PC 这个分布式事务协议通常是在 DB 层面实现，TCC 则相当于应用层面的 2PC，通过业务逻辑实现，能够允许程序自定义数据库操作粒度。
 
-## 缓存一致性
+## 缓存
 
 - [数据库和缓存双写一致性](https://www.cnblogs.com/rjzheng/p/9041659.html?spm=a2c6h.12873639.0.0.2020fe8dqb3Ls4)
+
+- [缓存方案](https://zhuanlan.zhihu.com/p/79944852)
+
+    热点数据缓存击穿问题，可以使用双缓存（多级缓存）。
+    
+    并发读取时，第一个线程获取锁成功，负责更新主缓存，后续线程返回副缓存数据。并发写入时，加分布式锁，更新副缓存，更新完毕后删除主缓存。
 
 # 8. DateBase
 
@@ -504,6 +512,8 @@
 
     系统最大 LSN > redo 日志中的 > 脏页中的 > checkpoint 中的
 
+- [主从分离，从库同样有读写的负荷为什么会提升性能?](https://zhuanlan.zhihu.com/p/34782828)
+
 ## innodb 存储引擎
 
 - 独立表空间的物理结构
@@ -530,6 +540,12 @@
     5. FirstMatch 外层表的每一条数据，与内层表进行匹配，匹配成功一次，便不再仅需进行匹配
 
 - [InnoDB recovery过程解析](https://sq.163yun.com/blog/article/172546631668785152)
+
+- 崩溃恢复机制
+
+    当mysql重启进入崩溃恢复时,首先利用redo恢复数据库的整体一致性,然后会根据保存binlog是否完整来决定事务重做或者回滚,如果binlog事务本身包含commit,则进行重做,否则回滚.
+
+- [MySQL更新语句是如何执行的](https://zhuanlan.zhihu.com/p/146968292)
 
 # 9. Spring
 
@@ -818,6 +834,12 @@
     
     服务器可以使用多个子进程/线程为每个套接字提供服务。操作系统（特别是UNIX）在设计上允许子进程从父进程继承所有文件描述符（FD）。因此，只要进程通过父子关系与A相关联，便可以由更多进程A1，A2..监听进程A侦听的所有套接字。
 
+- [TCP_NODELAY选项](https://www.jianshu.com/p/ccafdeda0b95)
+
+    TCP_NODELAY 关闭时，会开启 [Nagle 算法](https://www.cnblogs.com/postw/p/9710772.html)。
+
+    该算法要求一个 tcp 连接上最多只能有一个未被确认的未完成的小分组，在该分组 ack 到达之前不能发送其他的小分组，tcp 需要收集这些少量的分组，并在 ack 到来时以一个分组的方式发送出去。因此会有延迟。
+
 # 16. 数据结构
 
 - [Append-only B+ Tree](https://blog.csdn.net/lpstudy/article/details/83722007)
@@ -835,6 +857,18 @@
     1. 简单工厂封装了创建对象的过程，调用就生产产品 A；
     2. 工厂方法模式封装了多个简单工厂，可以根据入参，生产不同的产品 A、B；
     3. 抽象工厂封装了工厂方法，可以根据入参，返回不同的工厂。
+
+# 解决方案
+
+## SSO 统一登录
+
+1. filter 拦截 request，向浏览器返回重定向，浏览器重定向到 SSO 服务器 `ssoServerUrl + "/jump" + "?redirectUrl={0}&loginType={1}&needSaveSsoToken=false"`。
+
+2. SSO 服务器返回重定向地址 `getSsoServerUrl() + Constant.LOGIN_URL + "?redirectUrl=" + requestUrl + "&loginType=" + loginType`，重定向到 SSO 登录页面。
+
+3. 登录时，携带回调地址。登录成功，微信服务器回调接口，返回 token 信息。
+
+4. SSO 服务器解析得到 token，保存 token 信息，然后重定向到请求的初始地址，并携带 token 信息。
 
 # 工具包
 
