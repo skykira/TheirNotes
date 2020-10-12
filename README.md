@@ -35,6 +35,7 @@
 - [数据结构](#数据结构)
 - [设计模式](#设计模式)
 - [解决方案](#解决方案)
+  - [负载均衡](#负载均衡)
   - [SSO 统一登录](#sso-统一登录)
 - [工具包](#工具包)
 
@@ -831,6 +832,8 @@
 
     该算法要求一个 tcp 连接上最多只能有一个未被确认的未完成的小分组，在该分组 ack 到达之前不能发送其他的小分组，tcp 需要收集这些少量的分组，并在 ack 到来时以一个分组的方式发送出去。因此会有延迟。
 
+- [KeepAlived 原理](https://blog.csdn.net/qq_24336773/article/details/82143367)
+
 # 编程基础
 
 - [正则表达式的环视](https://blog.csdn.net/lxcnn/article/details/4304754)
@@ -864,6 +867,14 @@
     3. 抽象工厂封装了工厂方法，可以根据入参，返回不同的工厂。
 
 # 解决方案
+
+## 负载均衡
+
+- [DNS 轮询负载均衡](https://mp.weixin.qq.com/s/4dzqbh2wfzbQzgFodP2_6Q)
+
+- [lvs 会接受客户端的请求，为什么说 lvs 没有流量产生？](https://www.zhihu.com/question/36868056/answer/151700242)
+
+    对于 LVS 三种代理方式中的两种 —— IP Tunnelling 和 Direct Routing，客户端请求的报文每次会经过 lvs 转发到 realserver，但 realserver 回复的报文不会经过lvs。
 
 ## SSO 统一登录
 
