@@ -1,39 +1,38 @@
 <!-- TOC -->
 
-- [1. Java 基础](#1-java-基础)
-  - [1.1. HashMap](#11-hashmap)
-  - [1.2. ConcurrentHashMap](#12-concurrenthashmap)
-  - [1.3. Reference](#13-reference)
-- [2. Java 并发](#2-java-并发)
-  - [2.1. AQS](#21-aqs)
-  - [2.2. 偏向锁](#22-偏向锁)
-- [3. Java IO](#3-java-io)
-- [4. Java 安全](#4-java-安全)
-- [5. 函数式编程](#5-函数式编程)
-- [6. JVM](#6-jvm)
-  - [6.1. 垃圾收集](#61-垃圾收集)
+- [Java 基础](#java-基础)
+  - [HashMap](#hashmap)
+  - [ConcurrentHashMap](#concurrenthashmap)
+  - [Reference](#reference)
+- [Java 并发](#java-并发)
+  - [AQS](#aqs)
+  - [偏向锁](#偏向锁)
+- [Java IO](#java-io)
+- [Java 安全](#java-安全)
+- [函数式编程](#函数式编程)
+- [JVM](#jvm)
+  - [垃圾收集](#垃圾收集)
   - [ZGC](#zgc)
-  - [6.2. 字节码操作](#62-字节码操作)
-  - [6.3. 调优](#63-调优)
-- [7. 分布式](#7-分布式)
-  - [7.1. Raft](#71-raft)
-  - [7.2. BFT](#72-bft)
-  - [7.3. 分布式锁](#73-分布式锁)
-    - [7.3.1. Redis 分布式锁](#731-redis-分布式锁)
+  - [字节码操作](#字节码操作)
+  - [调优](#调优)
+- [分布式](#分布式)
+  - [Raft](#raft)
+  - [BFT](#bft)
+  - [分布式锁](#分布式锁)
   - [分布式事务](#分布式事务)
   - [缓存](#缓存)
-- [8. DateBase](#8-datebase)
+- [DateBase](#datebase)
   - [innodb 存储引擎](#innodb-存储引擎)
-- [9. Spring](#9-spring)
-  - [9.1. 源码解析](#91-源码解析)
-- [10. Dubbo](#10-dubbo)
-- [11. Tomcat](#11-tomcat)
-- [12. Netty](#12-netty)
-- [13. Kafka](#13-kafka)
-- [14. Linux](#14-linux)
-- [15. 编程基础](#15-编程基础)
-  - [TCP](#tcp)
-- [16. 数据结构](#16-数据结构)
+- [Spring](#spring)
+  - [源码解析](#源码解析)
+- [Dubbo](#dubbo)
+- [Tomcat](#tomcat)
+- [Netty](#netty)
+- [Kafka](#kafka)
+- [Linux](#linux)
+- [计算机网络](#计算机网络)
+- [编程基础](#编程基础)
+- [数据结构](#数据结构)
 - [设计模式](#设计模式)
 - [解决方案](#解决方案)
   - [SSO 统一登录](#sso-统一登录)
@@ -41,7 +40,7 @@
 
 <!-- /TOC -->
 
-# 1. Java 基础
+# Java 基础
 
 - [`Class.this` 与 `this` 的区别](https://stackoverflow.com/questions/5666134/what-is-the-difference-between-class-this-and-this-in-java)
 
@@ -85,7 +84,7 @@
 
     > 调用者只会使用它自己的 ClassLoader 来装载别的类
 
-## 1.1. HashMap
+## HashMap
 
 - [HashMap 源码分析](https://segmentfault.com/a/1190000012926722)
 
@@ -93,7 +92,7 @@
 
 - [HashMap 删除节点时的树退化为链表](https://www.cnblogs.com/lifacheng/p/11032482.html)
 
-## 1.2. ConcurrentHashMap
+## ConcurrentHashMap
 
 - [ConcurrentHashMap 源码分析](https://blog.csdn.net/u011392897/article/details/60479937)
 
@@ -107,13 +106,13 @@
 
 - [LongAdder 解析](https://juejin.im/post/6844903909127880717)
 
-## 1.3. Reference
+## Reference
 
 - [Java Reference核心原理分析](https://mp.weixin.qq.com/s/8f29ZfGvZVPe0bO-FahokQ)
 
 - [PhantomReference & Cleaner 的运行原理](https://zhuanlan.zhihu.com/p/29454205)
 
-# 2. Java 并发
+# Java 并发
 
 - [用户态内核态间切换耗时的原因](https://blog.csdn.net/u010727189/article/details/103401970)
 
@@ -143,13 +142,13 @@
 
 - [UncaughtExceptionHandler 解析](https://www.jianshu.com/p/f22efc8ef594)
 
-## 2.1. AQS
+## AQS
 
 - [CLH、MCS队列锁](https://www.cnblogs.com/sanzao/p/10567529.html)
 
     自旋锁具有一定的缺陷，非公平、线程饥饿、锁标识同步耗费资源，因此产生了队列锁，对多个自旋锁进行管理。
 
-## 2.2. 偏向锁
+## 偏向锁
 
 - [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)
 
@@ -203,7 +202,7 @@
 
     如果中断状态为true，那么park无法阻塞。
 
-# 3. Java IO
+# Java IO
 
 - [Java I/O体系从原理到应用](https://mp.weixin.qq.com/s/khyOVIqFp1vNK29OIMBBuQ)
 
@@ -219,17 +218,17 @@
 
   总的来说，[异步是编程语言和调用的API协同模拟出来的一种程序控制流风格](https://www.zhihu.com/question/19732473/answer/103182244)。程序可以在同步 API 上模拟出异步调用(比如多线程)，也可以屏蔽底层的异步接口。
 
-# 4. Java 安全
+# Java 安全
 
 - [如何理解恶意代码执行 `AccessController.doPrivileged()`](https://stackoverflow.com/questions/37962070/malicious-code-running-accesscontroller-doprivileged)
 
 - [java沙箱绕过](https://www.anquanke.com/post/id/151398)
 
-# 5. 函数式编程
+# 函数式编程
 
 - [`BiConsumer` 为什么可以引用仅有一个参数的方法](https://stackoverflow.com/questions/58046693/biconsumer-and-method-reference-of-one-parameter)
 
-# 6. JVM
+# JVM
 
 - [图说 Java 字节码指令](https://segmentfault.com/a/1190000008606277)
 
@@ -261,7 +260,7 @@
 
 - [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
 
-## 6.1. 垃圾收集
+## 垃圾收集
 
 - [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
 
@@ -410,7 +409,7 @@
 
 - [GCLocker-initiated young GC 多余发生](https://www.jianshu.com/p/ecc57a81f73c)
 
-## 6.2. 字节码操作
+## 字节码操作
 
 - [理解字节码增强工具包 Instrumentation ](https://www.throwable.club/2019/06/29/java-understand-instrument-first/)
 
@@ -419,25 +418,25 @@
 - [Java 字节码增强技术](https://tech.meituan.com/2019/09/05/java-bytecode-enhancement.html)
 
 
-## 6.3. 调优
+## 调优
 
 - [jmap 指令慎用](https://blog.csdn.net/seeJavaDocs/article/details/53643227)
 
-# 7. 分布式
+# 分布式
 
-## 7.1. Raft
+## Raft
 
 - [Raft 论文翻译](https://github.com/maemual/raft-zh_cn/blob/master/raft-zh_cn.md)
 
 - [客户端只读请求的处理](https://zhuanlan.zhihu.com/p/36592467)
 
-## 7.2. BFT
+## BFT
 
 - [PBFT 算法各阶段消息发送数量证明](https://zhuanlan.zhihu.com/p/53897982)
 
-## 7.3. 分布式锁
+## 分布式锁
 
-### 7.3.1. Redis 分布式锁
+###1. Redis 分布式锁
 
 - [基于Redis的分布式锁到底安全吗?](https://www.jianshu.com/p/dd66bdd18a56)
 
@@ -469,7 +468,7 @@
     
     并发读取时，第一个线程获取锁成功，负责更新主缓存，后续线程返回副缓存数据。并发写入时，加分布式锁，更新副缓存，更新完毕后删除主缓存。
 
-# 8. DateBase
+# DateBase
 
 - [MySQL LEFT JOIN/ INNER JOIN/RIGHT JOIN 执行过程](https://learnku.com/articles/27701)
 
@@ -547,7 +546,7 @@
 
 - [MySQL更新语句是如何执行的](https://zhuanlan.zhihu.com/p/146968292)
 
-# 9. Spring
+# Spring
 
 - [GenericTypeResolver.resolveTypeArguments(Class<?> clazz, Class<?> genericIfc)](https://stackoverflow.com/questions/34271764/generictyperesolver-resolvetypearguments-returns-null)获取继承泛型类的子类的泛型类型
 
@@ -568,7 +567,7 @@
 
 - [ApplicationContext 的继承体系](https://zhuanlan.zhihu.com/p/210268684)
 
-## 9.1. 源码解析
+## 源码解析
 
 - [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/5UvbeEnZBS7niAJw_f-6pQ) [](https://juejin.im/post/6860387888413343757)
 
@@ -687,7 +686,7 @@
     
     在 AOP 链式调用开始执行时，通过 `targetSource.getTarget()` 获得真正的目标对象 target。通过这种机制使得方法调用变得灵活,可以扩展出很多高级功能,如:target pool(目标对象池)、hot swap(运行时目标对象热替换)。
 
-# 10. Dubbo
+# Dubbo
 
 - [接口自适应类 T$Adaptive 查看](https://blog.csdn.net/swordyijianpku/article/details/105737163?utm_medium=distribute.pc_relevant.none-task-blog-baidujs-2)
 
@@ -705,13 +704,13 @@
 
     通过 ContextFilter 对 Invocation 中的 attachments 与 RpcContext 中的 LOCAL/SERVER_LOCAL 进行消息传递。
 
-# 11. Tomcat
+# Tomcat
 
 - [Tomcat 架构解析](https://mp.weixin.qq.com/s/fU5Jj9tQvNTjRiT9grm6RA)
 
 - [Tomcat 处理请求过程源码解析](https://blog.csdn.net/leileibest_437147623/article/details/85287568?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
-# 12. Netty
+# Netty
 
 > Reactor 模式
 > 
@@ -725,7 +724,7 @@
 
 - [netty 时间轮设计](https://zacard.net/2016/12/02/netty-hashedwheeltimer/)
 
-# 13. Kafka
+# Kafka
 
 - [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
 
@@ -735,7 +734,7 @@
 
     上级时间轮降级时，对于 timerTaskEntry 需要重新插入。
 
-# 14. Linux
+# Linux
 
 - Linux IO 模型
   - [简述 Linux IO 模型](https://mp.weixin.qq.com/s/3C7Iv1jof8jitOPL_4c_bQ)
@@ -791,21 +790,13 @@
 
 - [Linux中的文件描述符与打开文件之间的关系](https://blog.csdn.net/cywosp/article/details/38965239)
 
-# 15. 编程基础
+# 计算机网络
 
-- [正则表达式的环视](https://blog.csdn.net/lxcnn/article/details/4304754)
+- 为什么网络同时需要 IP 和 MAC 地址？
 
-    > `str.replaceFirst("(?<=.{5}).+", "...")`
-    >
-    > 保留 `str` 的前五位字符，其余字符用 `...` 代替
-    
-    - [正则表达式参考文档](http://notes.tanchuanqi.com/tools/regex.html)
+    - [历史原因](https://www.zhihu.com/question/21546408/answer/53576595)，TCP/IP（因特网） 完成了对异构网络间的互联互通，但没有定义物理层和数据链路层的具体细节，其需要运行于以太网等其它二层网络之上。
 
-- 将 javassist 动态生成的类打印出来
-
-    `(ClassGenerator)ccp.getClassPool().get("com.alibaba.dubbo.common.bytecode.Proxy0").debugWriteFile()`
-
-## TCP
+    - [功能原因](https://www.zhihu.com/question/21546408/answer/149670503)，IP 地址与地域相关，它虽然具有唯一标识作用，但不能唯一标识某台主机，MAC 地址才能唯一标识某台主机。如果仅有 IP 地址，主机 A IP 换了以后，发往主机 A 的消息不会发往 A 原来的 IP，而是会发送到 A 的 MAC 地址新对应的 IP 地址。所以，IP 用于路由，但无法永久唯一标识。
 
 - [TCP/IP 三次握手思考](https://blog.csdn.net/lengxiao1993/article/details/82771768?utm_medium=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
@@ -840,7 +831,21 @@
 
     该算法要求一个 tcp 连接上最多只能有一个未被确认的未完成的小分组，在该分组 ack 到达之前不能发送其他的小分组，tcp 需要收集这些少量的分组，并在 ack 到来时以一个分组的方式发送出去。因此会有延迟。
 
-# 16. 数据结构
+# 编程基础
+
+- [正则表达式的环视](https://blog.csdn.net/lxcnn/article/details/4304754)
+
+    > `str.replaceFirst("(?<=.{5}).+", "...")`
+    >
+    > 保留 `str` 的前五位字符，其余字符用 `...` 代替
+    
+    - [正则表达式参考文档](http://notes.tanchuanqi.com/tools/regex.html)
+
+- 将 javassist 动态生成的类打印出来
+
+    `(ClassGenerator)ccp.getClassPool().get("com.alibaba.dubbo.common.bytecode.Proxy0").debugWriteFile()`
+
+# 数据结构
 
 - [Append-only B+ Tree](https://blog.csdn.net/lpstudy/article/details/83722007)
 
