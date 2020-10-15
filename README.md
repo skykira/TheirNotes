@@ -28,6 +28,7 @@
 - [Dubbo](#dubbo)
 - [Tomcat](#tomcat)
 - [Netty](#netty)
+- [Zookeeper](#zookeeper)
 - [Kafka](#kafka)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
@@ -36,7 +37,7 @@
 - [设计模式](#设计模式)
 - [解决方案](#解决方案)
   - [负载均衡](#负载均衡)
-  - [SSO 统一登录](#sso-统一登录)
+  - [SSO 授权登录](#sso-授权登录)
 - [工具包](#工具包)
 
 <!-- /TOC -->
@@ -725,6 +726,22 @@
 
 - [netty 时间轮设计](https://zacard.net/2016/12/02/netty-hashedwheeltimer/)
 
+# Zookeeper
+
+- [zookeeper 如何保证事务按顺序生效？](https://time.geekbang.org/column/article/239261)
+
+- [zookeeper 选举过程保证一致性](https://www.jianshu.com/p/f30ae8e75d6d) 
+  
+    > 关于 zookeeper 的[问题一](https://segmentfault.com/q/1010000023814986)、[问题二](https://www.zhihu.com/question/324291664)?
+
+    选举开始时，首先需要加载事务快照日志，找到日志中最大的 zxid，如此能够保证一个事务事实上已经被超过半数节点接受后，即使 leader 节点崩溃，待选举结束后，该事务也会被提交。
+
+    当客户端连接的节点崩溃后，[客户端超时会进行重连](http://www.caotama.com/29507.html)，不会出现事务返回失败，但最终又成功的情况。
+
+- [zookeeper 不稳定解决方案](https://zhuanlan.zhihu.com/p/25594630)
+
+- [zookeeper 分区后的行为](https://cwiki.apache.org/confluence/display/ZOOKEEPER/FailureScenarios)
+
 # Kafka
 
 - [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
@@ -876,15 +893,19 @@
 
     对于 LVS 三种代理方式中的两种 —— IP Tunnelling 和 Direct Routing，客户端请求的报文每次会经过 lvs 转发到 realserver，但 realserver 回复的报文不会经过lvs。
 
-## SSO 统一登录
+## SSO 授权登录
 
-1. filter 拦截 request，向浏览器返回重定向，浏览器重定向到 SSO 服务器 `ssoServerUrl + "/jump" + "?redirectUrl={0}&loginType={1}&needSaveSsoToken=false"`。
+- OAuth 2.0 授权码登录过程
 
-2. SSO 服务器返回重定向地址 `getSsoServerUrl() + Constant.LOGIN_URL + "?redirectUrl=" + requestUrl + "&loginType=" + loginType`，重定向到 SSO 登录页面。
+  1. filter 拦截 request，向浏览器返回重定向，浏览器重定向到 SSO 服务器 `ssoServerUrl + "/jump" + "?redirectUrl={0}&loginType={1}&needSaveSsoToken=false"`。
 
-3. 登录时，携带回调地址。登录成功，微信服务器回调接口，返回 token 信息。
+  2. SSO 服务器返回重定向地址 `getSsoServerUrl() + Constant.LOGIN_URL + "?redirectUrl=" + requestUrl + "&loginType=" + loginType`，重定向到 SSO 登录页面。
 
-4. SSO 服务器解析得到 token，保存 token 信息，然后重定向到请求的初始地址，并携带 token 信息。
+  3. 登录时，携带回调地址。登录成功，微信服务器回调接口，返回 token 信息。
+
+  4. SSO 服务器解析得到 token，保存 token 信息，然后重定向到请求的初始地址，并携带 token 信息。
+
+- [JWT 的优缺点](https://www.cnblogs.com/nangec/p/12687258.html)
 
 # 工具包
 
