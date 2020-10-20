@@ -692,7 +692,9 @@
 
 - [接口自适应类 T$Adaptive 查看](https://blog.csdn.net/swordyijianpku/article/details/105737163?utm_medium=distribute.pc_relevant.none-task-blog-baidujs-2)
 
-    根据url中的参数，在运行时加载 SPI 扩展类
+    根据url中的参数，在运行时加载 SPI 扩展类。
+
+    SPI的实现类分为三类，1. 自适应实现类，2. 包裹类，3. 普通实现类，在 ExtensionLoader的getExtension(name) 时，框架会自动将包裹类包在普通实现类外部。例如，ProtocolFilterWrapper 具有生成 invoker 调用链的能力，生成 Extension 时，它自动包裹住普通 Extension，当调用 export() 方法导出时，便能够调用到它的增强方法。
 
 - [接口 Wrapper 类查看](https://www.jianshu.com/p/57d53ff17062)
 
@@ -705,6 +707,24 @@
 - [dubbo Filter 之 ContextFilter](https://blog.csdn.net/yuanshangshenghuo/article/details/107722549)
 
     通过 ContextFilter 对 Invocation 中的 attachments 与 RpcContext 中的 LOCAL/SERVER_LOCAL 进行消息传递。
+
+- [本地存根和本地伪装](http://dubbo.apache.org/zh-cn/blog/dubbo-stub-mock.html#fn3)
+
+- Dubbo [初始化过程](https://www.dazhuanlan.com/2019/12/08/5dec9c3fb6b49/)
+
+    DubboAutoConfiguration$MultipleDubboConfigConfiguration 引入了 [DubboConfigConfigurationRegistrar](https://www.dazhuanlan.com/2020/02/09/5e3f67a09f421/)，又导致引入了 DubboConfigConfiguration.Multiple.class、DubboConfigConfiguration.Single.class，DubboConfigBindingsRegistrar 处理 bboConfigConfiguration.Single.class 的注释 EnableDubboConfigBindings 的值（配置类元素数组）时，为每一个dubbo 配置类生成（空的） BeanDefinition 和对应的 com.alibaba.dubbo.config.spring.beans.factory.annotation.DubboConfigBindingBeanPostProcessor#0，该 DubboConfigBindingBeanPostProcessor 内部持有对应的 beanDefinition 的名称。
+
+    ServiceAnnotationBeanPostProcessor 的 ServiceAnnotationBeanPostProcessor() 找到所有带有 @Service 注释的类，并将它注册为类型为 ServiceBean 的 beanDefinition，其中记录了对真正的 @Service 服务提供者类的引用。
+
+    当 bean 实例化时，DubboConfigBindingBeanPostProcessor 的 postProcessBeforeInitialization() 方法匹配到对应的 beanName，然后对 Dubbo 的 AbstractConfig 各个配置类进行对应的赋值，根据属性前缀与 application.properties 中的属性进行绑定。
+
+    populateBean() 时，AbstractAutowireCapableBeanFactory 的 applyPropertyValues() 方法将 serviceBean 中的属性（例如：ref）由 RuntimeReference 转换为真正的代理类。之后，ServiceBean 作为 InitializingBean，在执行 afterPropertiesSet() 方法时，会对内部的其他属性，如：provider、protocol、module等进行赋值，通过在 beanFactory 中根据类型找到对应的 bean。
+
+    所有属性设置完毕，待会可以导出服务。
+
+- Dubbo Reference 装配过程
+
+    在 bean 实例化过程中，populateBean() 时，调用 InstantiationAwareBeanPostProcessor 的 postProcessPropertyValues() 方法，其中 AnnotationInjectedBeanPostProcessor 的 postProcessPropertyValues() 内部的 findInjectionMetadata() 方法
 
 # Tomcat
 
