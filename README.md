@@ -724,7 +724,9 @@
 
 - Dubbo Reference 装配过程
 
-    在 bean 实例化过程中，populateBean() 时，调用 InstantiationAwareBeanPostProcessor 的 postProcessPropertyValues() 方法，其中 AnnotationInjectedBeanPostProcessor 的 postProcessPropertyValues() 内部的 findInjectionMetadata() 方法
+    在 bean 实例化过程中，bean 刚实例化，在 populateBean() 之前，执行 applyMergedBeanDefinitionPostProcessors() 时，会对每个 bean 应用 MergedBeanDefinitionPostProcessor 的 postProcessMergedBeanDefinition() 方法，其中 ReferenceAnnotationBeanPostProcessor 会在方法中执行 findInjectionMetadata() 找到调用 InstantiationAwareBeanPostProcessor 的 postProcessPropertyValues() 方法，其中 AnnotationInjectedBeanPostProcessor 的 postProcessPropertyValues() 内部的 findInjectionMetadata() 方法对每个类找到其中带有 @Reference 注释的属性，包装为 dubbo 的 AnnotationInjectedBeanPostProcessor.AnnotatedInjectionMetadata 类型并缓存起来。
+
+    populateBean() 时，AnnotationInjectedBeanPostProcessor(实际为 ReferenceAnnotationBeanPostProcessor，属性 annotationType 为 @Reference) 作为 InstantiationAwareBeanPostProcessor，被调用其 postProcessPropertyValues() 方法（针对spring中，该方法在spring5.1以后被替换为 postProcessProperties()），该方法从缓存中得到当前 bean 的需要被注入的属性，执行 AnnotationInjectedBeanPostProcessor 中 AnnotatedFieldElement 的 inject() 方法，getInjectedObject() -> ReferenceAnnotationBeanPostProcessor.doGetInjectedBean() -> buildReferenceBeanIfAbsent(referencedBeanName|ReferenceBean 名称, reference|注释, injectedType|属性类型, getClassLoader()) 得到 ReferenceBean，并将 beanFactory 中的 dubbo 配置类设置到其中。最后，将该 ReferenceBean 生成 InvocationHandler，如果该服务为远端服务，则在此时进行初始化，设置 ReferenceBean 的 ref 属性，然后创建jdk动态代理，注入成功。
 
 # Tomcat
 
@@ -778,7 +780,7 @@
   - [简述 Linux IO 模型](https://mp.weixin.qq.com/s/3C7Iv1jof8jitOPL_4c_bQ)
   - [详述 Linux IO 模型](https://www.jianshu.com/p/486b0965c296)
 
-- [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)[](https://wenchao.ren/2019/07/Select%E3%80%81Epoll%E3%80%81KQueue%E5%8C%BA%E5%88%AB/)
+- [多路复用之select、poll、epoll](https://www.wemeng.top/2019/08/22/%E8%81%8A%E8%81%8AIO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E4%B9%8Bselect%E3%80%81poll%E3%80%81epoll%E8%AF%A6%E8%A7%A3/)['](https://wenchao.ren/2019/07/Select%E3%80%81Epoll%E3%80%81KQueue%E5%8C%BA%E5%88%AB/)
 
 - [Linux 零拷贝技术](https://mp.weixin.qq.com/s/0SHaQBgMJ4MlKjX6m08EpQ)
 
@@ -857,7 +859,7 @@
 
     端口复用时，只有一个Socket可以得到数据。
 
-- [多个 Socket 监听同一端口](https://blog.51cto.com/ticktick/779866)[](https://stackoverflow.com/questions/3329641/how-do-multiple-clients-connect-simultaneously-to-one-port-say-80-on-a-server)[](https://blog.csdn.net/u011580175/article/details/80306414)
+- [多个 Socket 监听同一端口](https://blog.51cto.com/ticktick/779866)['](https://stackoverflow.com/questions/3329641/how-do-multiple-clients-connect-simultaneously-to-one-port-say-80-on-a-server)['](https://blog.csdn.net/u011580175/article/details/80306414)
 
     一个进程可以与多个套接字关联，两个独立的进程不可以侦听同一端口。
     
@@ -924,6 +926,8 @@
   3. 登录时，携带回调地址。登录成功，微信服务器回调接口，返回 token 信息。
 
   4. SSO 服务器解析得到 token，保存 token 信息，然后重定向到请求的初始地址，并携带 token 信息。
+
+- [单点登录](https://juejin.im/entry/6844903782996770824#comment)['](https://zhuanlan.zhihu.com/p/25007591)
 
 - [JWT 的优缺点](https://www.cnblogs.com/nangec/p/12687258.html)
 
