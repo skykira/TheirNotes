@@ -11,6 +11,7 @@
 - [Java 安全](#java-安全)
 - [函数式编程](#函数式编程)
 - [JVM](#jvm)
+  - [元空间](#元空间)
   - [垃圾收集](#垃圾收集)
   - [ZGC](#zgc)
   - [字节码操作](#字节码操作)
@@ -19,6 +20,7 @@
   - [Raft](#raft)
   - [BFT](#bft)
   - [分布式锁](#分布式锁)
+    - [Redis 分布式锁](#redis-分布式锁)
   - [分布式事务](#分布式事务)
   - [缓存](#缓存)
 - [DateBase](#datebase)
@@ -262,6 +264,14 @@
 
 - [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
 
+## 元空间
+
+- [metaspace 元空间特征](https://stackoverflow.com/questions/18339707/permgen-elimination-in-jdk-8)
+
+- [metaspace 元空间存储内容](https://www.jianshu.com/p/a6f19189ec62)
+
+- [metaspace 与 DirectByteBuffer 并无关系](https://www.zhihu.com/question/399007267/answer/1260691185)
+
 ## 垃圾收集
 
 - [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
@@ -438,7 +448,7 @@
 
 ## 分布式锁
 
-###1. Redis 分布式锁
+### Redis 分布式锁
 
 - [基于Redis的分布式锁到底安全吗?](https://www.jianshu.com/p/dd66bdd18a56)
 
@@ -712,9 +722,9 @@
 
 - Dubbo [初始化过程](https://www.dazhuanlan.com/2019/12/08/5dec9c3fb6b49/)
 
-    DubboAutoConfiguration$MultipleDubboConfigConfiguration 引入了 [DubboConfigConfigurationRegistrar](https://www.dazhuanlan.com/2020/02/09/5e3f67a09f421/)，又导致引入了 DubboConfigConfiguration.Multiple.class、DubboConfigConfiguration.Single.class，DubboConfigBindingsRegistrar 处理 bboConfigConfiguration.Single.class 的注释 EnableDubboConfigBindings 的值（配置类元素数组）时，为每一个dubbo 配置类生成（空的） BeanDefinition 和对应的 com.alibaba.dubbo.config.spring.beans.factory.annotation.DubboConfigBindingBeanPostProcessor#0，该 DubboConfigBindingBeanPostProcessor 内部持有对应的 beanDefinition 的名称。
+    `DubboAutoConfiguration$MultipleDubboConfigConfiguration` 的注解 `@EnableDubboConfig` 引入了 [DubboConfigConfigurationRegistrar.class](https://www.dazhuanlan.com/2020/02/09/5e3f67a09f421/)，又导致引入了 `DubboConfigConfiguration.Single.class`，它们的注解 `@EnableDubboConfigBindings` 引入了 `DubboConfigBindingsRegistrar.class` 以处理 `DubboConfigConfiguration.Single.class` 的注解值，即 `@EnableDubboConfigBindings` 的值（配置类元素数组），处理过程中，为每一个dubbo 配置类生成（空的） BeanDefinition 和对应的 com.alibaba.dubbo.config.spring.beans.factory.annotation.DubboConfigBindingBeanPostProcessor#0，该 DubboConfigBindingBeanPostProcessor 内部持有对应的 beanDefinition 的名称。
 
-    ServiceAnnotationBeanPostProcessor 的 ServiceAnnotationBeanPostProcessor() 找到所有带有 @Service 注释的类，并将它注册为类型为 ServiceBean 的 beanDefinition，其中记录了对真正的 @Service 服务提供者类的引用。
+    身为 BeanDefinitionRegistryPostProcessor 的 ServiceAnnotationBeanPostProcessor 的 postProcessBeanDefinitionRegistry() 找到所有带有 @Service 注释的类，并将它注册为类型为 ServiceBean 的 beanDefinition，其中记录了对真正的 @Service 服务提供者类的引用。
 
     当 bean 实例化时，DubboConfigBindingBeanPostProcessor 的 postProcessBeforeInitialization() 方法匹配到对应的 beanName，然后对 Dubbo 的 AbstractConfig 各个配置类进行对应的赋值，根据属性前缀与 application.properties 中的属性进行绑定。
 
