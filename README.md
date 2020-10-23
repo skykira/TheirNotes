@@ -148,9 +148,15 @@
 
 ## AQS
 
+- [AbstractQueuedSynchronizer 源码解读](https://www.cnblogs.com/micrari/p/6937995.html)
+
 - [CLH、MCS队列锁](https://www.cnblogs.com/sanzao/p/10567529.html)
 
     自旋锁具有一定的缺陷，非公平、线程饥饿、锁标识同步耗费资源，因此产生了队列锁，对多个自旋锁进行管理。
+
+- setHead()
+
+    队列中的节点，获取到锁后，将 head 指向该节点，同时将 thread、pred、next 置为 null，仿佛就变为了虚拟头结点，仅保留后继结点对该头节点的指向。
 
 ## 偏向锁
 
@@ -192,6 +198,10 @@
 - [Java 中 `volatile` 的语义](https://www.jianshu.com/p/4e59476963b0)
 
 - [Java中的偏向锁、轻量级锁、重量级锁解析](https://blog.csdn.net/lengxiao1993/article/details/81568130?depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1&utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1)
+
+- [Monitor 降级](https://wiki.openjdk.java.net/display/HotSpot/Async+Monitor+Deflation#AsyncMonitorDeflation-AnExampleofObjectMonitorInterferenceDetection)
+
+    Monitor 全局存在多个，初始没有，需要的时候，创建；不用时，减少。
 
 - [Java中的锁降级](https://www.zhihu.com/question/63859501)
   - [Java中的锁级降提案✨✨](http://openjdk.java.net/jeps/8183909)
@@ -773,6 +783,8 @@
 - [zookeeper 不稳定解决方案](https://zhuanlan.zhihu.com/p/25594630)
 
 - [zookeeper 分区后的行为](https://cwiki.apache.org/confluence/display/ZOOKEEPER/FailureScenarios)
+
+- leader 初始化时，重新确立新的 epoch，可能是为了不跨多个数字，使得 epoch 连续。
 
 # Kafka
 
