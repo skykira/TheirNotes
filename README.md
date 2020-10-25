@@ -31,6 +31,7 @@
 - [Tomcat](#tomcat)
 - [Netty](#netty)
 - [Zookeeper](#zookeeper)
+  - [zab 原理解析](#zab-原理解析)
 - [Kafka](#kafka)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
@@ -39,7 +40,7 @@
 - [设计模式](#设计模式)
 - [解决方案](#解决方案)
   - [负载均衡](#负载均衡)
-  - [SSO 授权登录](#sso-授权登录)
+  - [SSO](#sso)
 - [工具包](#工具包)
 
 <!-- /TOC -->
@@ -446,6 +447,9 @@
 
 # 分布式
 
+- [拜占庭将军问题和FLP的启示
+](https://www.jianshu.com/p/b620cbabf857)
+
 ## Raft
 
 - [Raft 论文翻译](https://github.com/maemual/raft-zh_cn/blob/master/raft-zh_cn.md)
@@ -776,15 +780,31 @@
   
     > 关于 zookeeper 的[问题一](https://segmentfault.com/q/1010000023814986)、[问题二](https://www.zhihu.com/question/324291664)?
 
-    选举开始时，首先需要加载事务快照日志，找到日志中最大的 zxid，如此能够保证一个事务事实上已经被超过半数节点接受后，即使 leader 节点崩溃，待选举结束后，该事务也会被提交。
-
     当客户端连接的节点崩溃后，[客户端超时会进行重连](http://www.caotama.com/29507.html)，不会出现事务返回失败，但最终又成功的情况。
 
 - [zookeeper 不稳定解决方案](https://zhuanlan.zhihu.com/p/25594630)
 
 - [zookeeper 分区后的行为](https://cwiki.apache.org/confluence/display/ZOOKEEPER/FailureScenarios)
 
-- leader 初始化时，重新确立新的 epoch，可能是为了不跨多个数字，使得 epoch 连续。
+- [zxid 溢出处理](https://segmentfault.com/q/1010000022201186)
+
+- [Zookeeper 崩溃选举之后的数据同步过程](https://blog.csdn.net/qq_41775852/article/details/104947943)
+
+- [zookeeper sessionMovedException 处理过程](https://blog.csdn.net/trntaken/article/details/108808165)
+
+## zab 原理解析
+
+1. zookeeper 崩溃后，加载磁盘中的快照和事务日志，但事务日志中包含已经commit和未commit的proposal，这样岂不是应用了未经过仲裁的proposal？
+
+- [官网文档 ZooKeeper Internals](https://zookeeper.apache.org/doc/r3.3.5/zookeeperInternals.html)
+
+    > any uncommited proposals from a previous epoch seen by a new leader will be committed by that leader before it becomes active.
+
+    新当选 leader 会提交上一任的未提交 proposal。如果提案p1被发出后，未被提交，leader 崩溃，重新开始选举，新的 leader 如果因为崩溃等原因，没有P1，则 P1 提案被返回失败。如果新的leader有P1，则P1成功。
+
+    > ZooKeeper messaging consists of two phases：Leader Activation and Active messaging。
+
+    选举后，leader要开始消息广播，需要两个步骤。第一，leader 激活。leader 当选需要两个条件，拥有最大 zxid 同时被法定任务的服务器承诺跟随。第一点是硬性条件，但第二点只要有极高的把握即可，成为准 leader 后，leader activation 会对该leader进行二次检查。
 
 # Kafka
 
@@ -937,7 +957,7 @@
 
     对于 LVS 三种代理方式中的两种 —— IP Tunnelling 和 Direct Routing，客户端请求的报文每次会经过 lvs 转发到 realserver，但 realserver 回复的报文不会经过lvs。
 
-## SSO 授权登录
+## SSO
 
 - OAuth 2.0 授权码登录过程
 
