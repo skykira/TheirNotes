@@ -450,9 +450,27 @@
 - [拜占庭将军问题和FLP的启示
 ](https://www.jianshu.com/p/b620cbabf857)
 
+- [如何解决分布式系统中的“幽灵复现”?](https://developer.aliyun.com/article/749236?utm_content=g_1000107462)['](https://zhuanlan.zhihu.com/p/112681511)
+
+    > 从服务端来看“幽灵复现”问题，就是在failover情况下，新的leader不清楚当前的committed index，也就是分不清log entry是committed状态还是未committed状态，所以需要通过一定的日志恢复手段，保证已经提交的日志不会被丢掉（最大 commit 原则），并且通过一个分界线（如MultiPaxos的StartWorking，Raft的noop，Zab的CurrentEpoch）来决定日志将会被commit还是被drop，从而避免模糊不一的状态。
+
+    为什么未提交的 log 需要丢弃？什么时候未提交的 log 需要丢弃？
+
+    间隔了一个任期的未提交的 log 需要必须丢弃。本质上，每当一任 leader 当选后，便会为客户端展示一份一致的视图，此时不存在的 log 不能无端再次出现。
+
+    zab 和 raft 通过在每次选举成功后，持久化当前任期来保证，新的 leader 必须在当前 leader 视图的基础上进行新的提案的读写。
+
 ## Raft
 
 - [Raft 论文翻译](https://github.com/maemual/raft-zh_cn/blob/master/raft-zh_cn.md)
+
+- [Raft 如何处理上一任未提交的的 log](https://zhuanlan.zhihu.com/p/268299972)
+
+    raft 不直接处理上一任未提交的 log，当选举成功后，leader 发送 noop 的一条 log(这条日志里的 term 将是该任期，也就是最新的 term)，按照协议，follower 当前的日志如果不能与 noop 这条日志匹配（index 与 leader 一致才能匹配）的话，则返回拒绝。leader 将会回退 nextIndex，然后重试 AppendEntries 请求，直到 follower 追上进度，接受了 noop 这条log，才会向 leader 返回确认。
+
+    此时，leader 的 noop log 如果收到了大多数 follower 的确认后，leader 节点中上一任的 log 便已经被提交了。
+
+    当新的任期中，有一条该任期的 log entry 被多数 follower 接受后，以前的为提交的 log 才算是真正提交了。
 
 - [客户端只读请求的处理](https://zhuanlan.zhihu.com/p/36592467)
 
