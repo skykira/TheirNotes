@@ -17,12 +17,16 @@
   - [字节码操作](#字节码操作)
   - [调优](#调优)
 - [分布式](#分布式)
+  - [Paxos](#paxos)
   - [Raft](#raft)
   - [BFT](#bft)
   - [分布式锁](#分布式锁)
     - [Redis 分布式锁](#redis-分布式锁)
   - [分布式事务](#分布式事务)
   - [缓存](#缓存)
+- [Zookeeper](#zookeeper)
+  - [zab 原理解析](#zab-原理解析)
+- [Kafka](#kafka)
 - [DateBase](#datebase)
   - [innodb 存储引擎](#innodb-存储引擎)
 - [Spring](#spring)
@@ -30,9 +34,6 @@
 - [Dubbo](#dubbo)
 - [Tomcat](#tomcat)
 - [Netty](#netty)
-- [Zookeeper](#zookeeper)
-  - [zab 原理解析](#zab-原理解析)
-- [Kafka](#kafka)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
 - [编程基础](#编程基础)
@@ -460,11 +461,17 @@
 
     zab 和 raft 通过在每次选举成功后，持久化当前任期来保证，新的 leader 必须在当前 leader 视图的基础上进行新的提案的读写。
 
+## Paxos
+
+- [Paxos原理、历程及实战](https://mp.weixin.qq.com/s?__biz=MzAwMDU1MTE1OQ==&mid=403582309&idx=1&sn=80c006f4e84a8af35dc8e9654f018ace&scene=1&srcid=0119gtt2MOru0Jz4DHA3Rzqy&key=710a5d99946419d927f6d5cd845dc9a72ff3d652a8e66f0ddf87d91262fd262f61f63660690d2d5da76a44a29e155610&ascene=0&uin=MjA1MDk3Njk1&devicetype=iMac+MacBookPro11%2C4+OSX+OSX+10.11.1+build(15B42)&version=11020201&pass_ticket=bhstP11nRHvorVXvQ4pt9fzB9Vdzj5sSRBe84783gsg%3D)
+
 ## Raft
 
 - [Raft 论文翻译](https://github.com/maemual/raft-zh_cn/blob/master/raft-zh_cn.md)
 
-- [Raft 如何处理上一任未提交的的 log](https://zhuanlan.zhihu.com/p/268299972)
+- [Raft 演示工具](https://raft.github.io/)
+
+- [Raft 如何处理上一任未提交的的 log](https://zhuanlan.zhihu.com/p/268299972)['](https://zhuanlan.zhihu.com/p/39105353)
 
     raft 不直接处理上一任未提交的 log，当选举成功后，leader 发送 noop 的一条 log(这条日志里的 term 将是该任期，也就是最新的 term)，按照协议，follower 当前的日志如果不能与 noop 这条日志匹配（index 与 leader 一致才能匹配）的话，则返回拒绝。leader 将会回退 nextIndex，然后重试 AppendEntries 请求，直到 follower 追上进度，接受了 noop 这条log，才会向 leader 返回确认。
 
@@ -472,7 +479,11 @@
 
     当新的任期中，有一条该任期的 log entry 被多数 follower 接受后，以前的为提交的 log 才算是真正提交了。
 
+- [Raft 成员变更](https://zhuanlan.zhihu.com/p/32052223)
+
 - [客户端只读请求的处理](https://zhuanlan.zhihu.com/p/36592467)
+
+- [raft 测验](https://ongardie.net/static/raft/userstudy/quizzes.html)
 
 ## BFT
 
@@ -511,6 +522,58 @@
     热点数据缓存击穿问题，可以使用双缓存（多级缓存）。
     
     并发读取时，第一个线程获取锁成功，负责更新主缓存，后续线程返回副缓存数据。并发写入时，加分布式锁，更新副缓存，更新完毕后删除主缓存。
+
+# Zookeeper
+
+- [zookeeper 如何保证事务按顺序生效？](https://time.geekbang.org/column/article/239261)
+
+- [zookeeper 选举过程保证一致性](https://www.jianshu.com/p/f30ae8e75d6d) 
+  
+    > 关于 zookeeper 的[问题一](https://segmentfault.com/q/1010000023814986)、[问题二](https://www.zhihu.com/question/324291664)?
+
+    当客户端连接的节点崩溃后，[客户端超时会进行重连](http://www.caotama.com/29507.html)，不会出现事务返回失败，但最终又成功的情况。
+
+- [zookeeper 不稳定解决方案](https://zhuanlan.zhihu.com/p/25594630)
+
+- [zookeeper 分区后的行为](https://cwiki.apache.org/confluence/display/ZOOKEEPER/FailureScenarios)
+
+- [zxid 溢出处理](https://segmentfault.com/q/1010000022201186)
+
+- [Zookeeper 崩溃选举之后的数据同步过程](https://blog.csdn.net/qq_41775852/article/details/104947943)
+
+- [zookeeper sessionMovedException 处理过程](https://blog.csdn.net/trntaken/article/details/108808165)
+
+- [fast leader election](https://mp.weixin.qq.com/s/bS_Se3UnEVGKJgILLhhiTA)
+
+    zab 协议四个阶段 —— 选举，发现，同步，广播。
+    
+    fle 三个阶段 —— 选举，恢复，广播。
+
+## zab 原理解析
+
+1. zookeeper 崩溃后，加载磁盘中的快照和事务日志，但事务日志中包含已经commit和未commit的proposal，这样岂不是应用了未经过仲裁的proposal？
+
+- [官网文档 ZooKeeper Internals](https://zookeeper.apache.org/doc/r3.3.5/zookeeperInternals.html)
+
+    > any uncommited proposals from a previous epoch seen by a new leader will be committed by that leader before it becomes active.
+
+    新当选 leader 会提交上一任的未提交 proposal。如果提案p1被发出后，未被提交，leader 崩溃，重新开始选举，新的 leader 如果因为崩溃等原因，没有P1，则 P1 提案被返回失败。如果新的leader有P1，则P1成功。
+
+    > ZooKeeper messaging consists of two phases：Leader Activation and Active messaging。
+
+    选举后，leader要开始消息广播，需要两个步骤。第一，leader 激活。leader 当选需要两个条件，拥有最大 zxid 同时被法定任务的服务器承诺跟随。第一点是硬性条件，但第二点只要有极高的把握即可，成为准 leader 后，leader activation 会对该leader进行二次检查。
+
+# Kafka
+
+- [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
+
+- [kafka 时间轮设计](https://blog.lovezhy.cc/2020/01/11/Kafka%E6%8C%87%E5%8D%97-%E6%97%B6%E9%97%B4%E8%BD%AE%E5%AE%9E%E7%8E%B0/)
+
+    currentTime 在有了 queue 之后，就没有其他作用了，主要就是在 add 方法中拦住即将过期或者已经过期的任务。
+
+    上级时间轮降级时，对于 timerTaskEntry 需要重新插入。
+
+
 
 # DateBase
 
@@ -789,50 +852,6 @@
 - [Netty 启动源码分析](https://mp.weixin.qq.com/mp/appmsgalbum?action=getalbum&album_id=1342147420482011137&__biz=MzI2NzY4MjM1OQ==#wechat_redirect)(猿灯塔|需微信中打开)
 
 - [netty 时间轮设计](https://zacard.net/2016/12/02/netty-hashedwheeltimer/)
-
-# Zookeeper
-
-- [zookeeper 如何保证事务按顺序生效？](https://time.geekbang.org/column/article/239261)
-
-- [zookeeper 选举过程保证一致性](https://www.jianshu.com/p/f30ae8e75d6d) 
-  
-    > 关于 zookeeper 的[问题一](https://segmentfault.com/q/1010000023814986)、[问题二](https://www.zhihu.com/question/324291664)?
-
-    当客户端连接的节点崩溃后，[客户端超时会进行重连](http://www.caotama.com/29507.html)，不会出现事务返回失败，但最终又成功的情况。
-
-- [zookeeper 不稳定解决方案](https://zhuanlan.zhihu.com/p/25594630)
-
-- [zookeeper 分区后的行为](https://cwiki.apache.org/confluence/display/ZOOKEEPER/FailureScenarios)
-
-- [zxid 溢出处理](https://segmentfault.com/q/1010000022201186)
-
-- [Zookeeper 崩溃选举之后的数据同步过程](https://blog.csdn.net/qq_41775852/article/details/104947943)
-
-- [zookeeper sessionMovedException 处理过程](https://blog.csdn.net/trntaken/article/details/108808165)
-
-## zab 原理解析
-
-1. zookeeper 崩溃后，加载磁盘中的快照和事务日志，但事务日志中包含已经commit和未commit的proposal，这样岂不是应用了未经过仲裁的proposal？
-
-- [官网文档 ZooKeeper Internals](https://zookeeper.apache.org/doc/r3.3.5/zookeeperInternals.html)
-
-    > any uncommited proposals from a previous epoch seen by a new leader will be committed by that leader before it becomes active.
-
-    新当选 leader 会提交上一任的未提交 proposal。如果提案p1被发出后，未被提交，leader 崩溃，重新开始选举，新的 leader 如果因为崩溃等原因，没有P1，则 P1 提案被返回失败。如果新的leader有P1，则P1成功。
-
-    > ZooKeeper messaging consists of two phases：Leader Activation and Active messaging。
-
-    选举后，leader要开始消息广播，需要两个步骤。第一，leader 激活。leader 当选需要两个条件，拥有最大 zxid 同时被法定任务的服务器承诺跟随。第一点是硬性条件，但第二点只要有极高的把握即可，成为准 leader 后，leader activation 会对该leader进行二次检查。
-
-# Kafka
-
-- [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
-
-- [kafka 时间轮设计](https://blog.lovezhy.cc/2020/01/11/Kafka%E6%8C%87%E5%8D%97-%E6%97%B6%E9%97%B4%E8%BD%AE%E5%AE%9E%E7%8E%B0/)
-
-    currentTime 在有了 queue 之后，就没有其他作用了，主要就是在 add 方法中拦住即将过期或者已经过期的任务。
-
-    上级时间轮降级时，对于 timerTaskEntry 需要重新插入。
 
 # Linux
 
