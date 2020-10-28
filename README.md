@@ -737,19 +737,21 @@
     
                 1. 类型为 DeferredImportSelector.class 时
     
-                    添加到 `deferredImportSelectors`，等待处    理
+                    添加到 `deferredImportSelectors`，等待处理
     
                 2. 其他，递归处理，直到将需要导入的普通配置类处理完
     
-            2. 导入 `ImportBeanDefinitionRegistrar.class` 类    型时
-                导入 `importBeanDefinitionRegistrars`，等待处   理
+            2. 导入 `ImportBeanDefinitionRegistrar.class` 类型时
+                
+                导入 `importBeanDefinitionRegistrars`，等待处理
+            
             3. 都不是，作为普通配置类被解析
        5. 解析 @ImportResource 注解指示的类，填入   `importedResources` 中
        6. 解析 @Bean 修饰的方法引入的 bean
        7. 解析接口中默认方法可能引入的 bean
        8. 解析父类，返回然后递归解析
        9. 若全部递归完成，返回null，跳出解析过程
-       10. `parse()` 方法返回前，处理   `deferredImportSelectors` 中需要延迟注册的    BeanDefinition，因为这些 BeanDefinition 注册有     condition，所以需要在其余的加载完后，再轮到他们
+       10. `parse()` 方法返回前，处理   `deferredImportSelectors` 中需要延迟注册的    BeanDefinition，因为这些 BeanDefinition 注册有 condition，所以需要在其余的加载完后，再轮到他们
     
     5. this.reader.loadBeanDefinitions(configClasses);
     
