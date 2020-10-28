@@ -755,9 +755,9 @@
     
     5. this.reader.loadBeanDefinitions(configClasses);
     
-       将 configClasses 中的类解析为 BeanDefinition，只有   @ComponentScan 扫描出来的类全部变为了 BeanDefinition，其  余的暂时存在于 configClass 中。
+       将 configClasses 中的类解析为 BeanDefinition，只有  @ComponentScan 扫描出来的类全部变为了 BeanDefinition，其余的暂时存在于 configClass 中。
     
-        1.  registerBeanDefinitionForImportedConfigurationClass  (configClass);
+        1. registerBeanDefinitionForImportedConfigurationClass  (configClass);
     
             将 ImportSelector.class 导入的类解析
     
