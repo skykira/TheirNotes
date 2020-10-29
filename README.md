@@ -14,7 +14,7 @@
     - [Java 安全](#java-安全)
   - [Java 并发](#java-并发)
     - [AQS](#aqs)
-    - [偏向锁](#偏向锁)
+    - [偏向锁✨](#偏向锁)
   - [Java IO](#java-io)
 - [JVM](#jvm)
   - [垃圾收集](#垃圾收集)
@@ -214,9 +214,9 @@
 
     队列中的节点，获取到锁后，将 head 指向该节点，同时将 thread、pred、next 置为 null，仿佛就变为了虚拟头结点，仅保留后继结点对该头节点的指向。
 
-### 偏向锁
+### 偏向锁✨
 
-- [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)✨
+- [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)
 
     假设有类 A。
 
