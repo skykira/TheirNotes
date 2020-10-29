@@ -17,11 +17,13 @@
     - [偏向锁](#偏向锁)
   - [Java IO](#java-io)
 - [JVM](#jvm)
-  - [元空间](#元空间)
   - [垃圾收集](#垃圾收集)
-  - [ZGC](#zgc)
+    - [CMS](#cms)
+    - [G1](#g1)
+    - [ZGC](#zgc)
+  - [元空间](#元空间)
   - [字节码操作](#字节码操作)
-  - [调优](#调优)
+  - [JVM 调优](#jvm-调优)
 - [DateBase](#datebase)
   - [innodb 存储引擎](#innodb-存储引擎)
 - [分布式](#分布式)
@@ -318,15 +320,9 @@
 
 - [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
 
-## 元空间
-
-- [metaspace 元空间特征](https://stackoverflow.com/questions/18339707/permgen-elimination-in-jdk-8)
-
-- [metaspace 元空间存储内容](https://www.jianshu.com/p/a6f19189ec62)
-
-- [metaspace 与 DirectByteBuffer 并无关系](https://www.zhihu.com/question/399007267/answer/1260691185)
-
 ## 垃圾收集
+
+### CMS
 
 - [CMS 垃圾收集过程](https://zhuanlan.zhihu.com/p/54286173)
 
@@ -340,6 +336,7 @@
 
     concurrent-abortable-preclean 用于调度 remark 的开始时机，防止连续 STW。
 
+### G1
 
 - [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
 
@@ -459,7 +456,7 @@
     //清理阶段会根据所有Region标记信息，计算出每个Region存活对象信息，并且把Region根据GC回收效率排序
     [GC cleanup 680M->680M(1024M), 0.0006165 secs]
     ```
-## ZGC
+### ZGC
 
 - [ZGC 读屏障过程](https://zhuanlan.zhihu.com/p/43608166)
 
@@ -475,6 +472,14 @@
 
 - [GCLocker-initiated young GC 多余发生](https://www.jianshu.com/p/ecc57a81f73c)
 
+## 元空间
+
+- [metaspace 元空间特征](https://stackoverflow.com/questions/18339707/permgen-elimination-in-jdk-8)
+
+- [metaspace 元空间存储内容](https://www.jianshu.com/p/a6f19189ec62)
+
+- [metaspace 与 DirectByteBuffer 并无关系](https://www.zhihu.com/question/399007267/answer/1260691185)
+
 ## 字节码操作
 
 - [理解字节码增强工具包 Instrumentation ](https://www.throwable.club/2019/06/29/java-understand-instrument-first/)
@@ -483,7 +488,7 @@
 
 - [Java 字节码增强技术](https://tech.meituan.com/2019/09/05/java-bytecode-enhancement.html)
 
-## 调优
+## JVM 调优
 
 - [jmap 指令慎用](https://blog.csdn.net/seeJavaDocs/article/details/53643227)
 
