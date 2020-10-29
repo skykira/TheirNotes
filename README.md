@@ -1,15 +1,20 @@
 <!-- TOC -->
 
-- [Java 基础](#java-基础)
+- [数据结构](#数据结构)
   - [HashMap](#hashmap)
   - [ConcurrentHashMap](#concurrenthashmap)
+  - [Append-only B+ Tree](#append-only-b-tree)
+  - [LSM tree](#lsm-tree)
+  - [红黑树与 AVL 树](#红黑树与-avl-树)
+  - [LinkedBlockingQueue 与 ArrayBlockingQueue](#linkedblockingqueue-与-arrayblockingqueue)
+- [Java 基础](#java-基础)
   - [Reference](#reference)
+  - [函数式编程](#函数式编程)
+  - [Java 安全](#java-安全)
 - [Java 并发](#java-并发)
   - [AQS](#aqs)
   - [偏向锁](#偏向锁)
 - [Java IO](#java-io)
-- [Java 安全](#java-安全)
-- [函数式编程](#函数式编程)
 - [JVM](#jvm)
   - [元空间](#元空间)
   - [垃圾收集](#垃圾收集)
@@ -35,9 +40,9 @@
 - [Tomcat](#tomcat)
 - [Netty](#netty)
 - [Linux](#linux)
+  - [通信协议](#通信协议)
 - [计算机网络](#计算机网络)
 - [编程基础](#编程基础)
-- [数据结构](#数据结构)
 - [设计模式](#设计模式)
 - [解决方案](#解决方案)
   - [负载均衡](#负载均衡)
@@ -45,6 +50,60 @@
 - [工具包](#工具包)
 
 <!-- /TOC -->
+
+# 数据结构
+
+## HashMap
+
+- [HashMap 源码分析](https://segmentfault.com/a/1190000012926722)
+
+- [JDK1.7 HashMap infinite loop](https://my.oschina.net/u/1024107/blog/758588)
+
+- [HashMap 删除节点时的树退化为链表](https://www.cnblogs.com/lifacheng/p/11032482.html)
+
+## ConcurrentHashMap
+
+- [ConcurrentHashMap 源码分析](https://blog.csdn.net/u011392897/article/details/60479937)
+
+- [ConcurrentHashMap 扩容图文详解](https://blog.csdn.net/ZOKEKAI/article/details/90051567)
+
+    正在迁移的hash桶遇到 get 操作会发生什么？
+
+    答：在扩容过程期间形成的 hn 和 ln 链是使用的类似于复制引用的方式，也就是说 ln 和 hn 链是复制出来的，而非原来的链表迁移过去的，所以原来 hash 桶上的链表并没有受到影响，因此从迁移开始到迁移结束这段时间都是可以正常访问原数组 hash 桶上面的链表，迁移结束后放置上fwd，往后的访问请求就直接转发到扩容后的数组去了。
+
+- [ConcurrentHashMap 方法总结](https://juejin.im/post/5b001639f265da0b8f62d0f8#comment)
+
+- [LongAdder 解析](https://juejin.im/post/6844903909127880717)
+
+## Append-only B+ Tree
+
+- [Append-only B+ Tree](https://blog.csdn.net/lpstudy/article/details/83722007)
+
+    理念类似 MVCC 保留历史版本，类似 copyOnWrite 修改通过新增的方式。
+
+## LSM tree
+
+- [LevelDB 设计与实现 —— LSM tree](https://blog.csdn.net/anderscloud/article/details/7182165)
+
+    通过顺序写 log，内存写 skiplist，延迟更新删除的方式，加速写入的速度。
+
+## 红黑树与 AVL 树
+
+- [红黑树与 AVL 树比较](https://www.zhihu.com/question/19856999/answer/1254240739)
+
+    红黑树类似添加了缓存的 AVL 树。
+
+## LinkedBlockingQueue 与 ArrayBlockingQueue
+
+- [LinkedBlockingQueue 与 ArrayBlockingQueue 源码分析](https://blog.csdn.net/javazejian/article/details/77410889)
+
+    LinkedBlockingQueue 实现中，以 put() 方法为例，生产者线程不停地添加元素，如果添加后容量不满，会唤醒正在等待 notFull 的生产者。只有容量满了之后，生产者会阻塞。之后某一个消费者消费了元素后，检测到队列在消费之前是满的，则会唤醒等待的生产者。
+    
+    所以，在队列从空向满，生产者添加任务的时候，生产者不会阻塞，当因队列满阻塞时，会有消费者线程帮忙唤醒。
+
+- [为什么ArrayBlockingQueue不使用LinkedBlockingQueue类似的双锁实现?](https://blog.csdn.net/icepigeon314/article/details/93792519)
+
+    首先，ArrayBlockingQueue 可以使用双锁实现，设计者可能认为 Java 并不需要支持两个类似的 BlockingQueue。
 
 # Java 基础
 
@@ -90,33 +149,21 @@
 
     > 调用者只会使用它自己的 ClassLoader 来装载别的类
 
-## HashMap
-
-- [HashMap 源码分析](https://segmentfault.com/a/1190000012926722)
-
-- [JDK1.7 HashMap infinite loop](https://my.oschina.net/u/1024107/blog/758588)
-
-- [HashMap 删除节点时的树退化为链表](https://www.cnblogs.com/lifacheng/p/11032482.html)
-
-## ConcurrentHashMap
-
-- [ConcurrentHashMap 源码分析](https://blog.csdn.net/u011392897/article/details/60479937)
-
-- [ConcurrentHashMap 扩容图文详解](https://blog.csdn.net/ZOKEKAI/article/details/90051567)
-
-    正在迁移的hash桶遇到 get 操作会发生什么？
-
-    答：在扩容过程期间形成的 hn 和 ln 链是使用的类似于复制引用的方式，也就是说 ln 和 hn 链是复制出来的，而非原来的链表迁移过去的，所以原来 hash 桶上的链表并没有受到影响，因此从迁移开始到迁移结束这段时间都是可以正常访问原数组 hash 桶上面的链表，迁移结束后放置上fwd，往后的访问请求就直接转发到扩容后的数组去了。
-
-- [ConcurrentHashMap 方法总结](https://juejin.im/post/5b001639f265da0b8f62d0f8#comment)
-
-- [LongAdder 解析](https://juejin.im/post/6844903909127880717)
-
 ## Reference
 
 - [Java Reference核心原理分析](https://mp.weixin.qq.com/s/8f29ZfGvZVPe0bO-FahokQ)
 
 - [PhantomReference & Cleaner 的运行原理](https://zhuanlan.zhihu.com/p/29454205)
+
+## 函数式编程
+
+- [`BiConsumer` 为什么可以引用仅有一个参数的方法](https://stackoverflow.com/questions/58046693/biconsumer-and-method-reference-of-one-parameter)
+
+## Java 安全
+
+- [如何理解恶意代码执行 `AccessController.doPrivileged()`](https://stackoverflow.com/questions/37962070/malicious-code-running-accesscontroller-doprivileged)
+
+- [java沙箱绕过](https://www.anquanke.com/post/id/151398)
 
 # Java 并发
 
@@ -233,16 +280,6 @@
    - 在[网络通信](https://www.zhihu.com/question/19732473/answer/308092103)中，主要是同步阻塞和异步非阻塞。同步意味着，发送方发出请求后等待返回结果，然后发出下一次请求。异步意味着，发送方不必等待结果可发送下一次请求。
 
   总的来说，[异步是编程语言和调用的API协同模拟出来的一种程序控制流风格](https://www.zhihu.com/question/19732473/answer/103182244)。程序可以在同步 API 上模拟出异步调用(比如多线程)，也可以屏蔽底层的异步接口。
-
-# Java 安全
-
-- [如何理解恶意代码执行 `AccessController.doPrivileged()`](https://stackoverflow.com/questions/37962070/malicious-code-running-accesscontroller-doprivileged)
-
-- [java沙箱绕过](https://www.anquanke.com/post/id/151398)
-
-# 函数式编程
-
-- [`BiConsumer` 为什么可以引用仅有一个参数的方法](https://stackoverflow.com/questions/58046693/biconsumer-and-method-reference-of-one-parameter)
 
 # JVM
 
@@ -465,11 +502,11 @@
 
 - [Paxos原理、历程及实战](https://mp.weixin.qq.com/s?__biz=MzAwMDU1MTE1OQ==&mid=403582309&idx=1&sn=80c006f4e84a8af35dc8e9654f018ace&scene=1&srcid=0119gtt2MOru0Jz4DHA3Rzqy&key=710a5d99946419d927f6d5cd845dc9a72ff3d652a8e66f0ddf87d91262fd262f61f63660690d2d5da76a44a29e155610&ascene=0&uin=MjA1MDk3Njk1&devicetype=iMac+MacBookPro11%2C4+OSX+OSX+10.11.1+build(15B42)&version=11020201&pass_ticket=bhstP11nRHvorVXvQ4pt9fzB9Vdzj5sSRBe84783gsg%3D)
 
+- [paxos算法中，如果有两个值被Accept了，其中一个形成了多数派，另外一个值怎么处理？](https://www.zhihu.com/question/57947049/answer/155030335)
+
 ## Raft
 
 - [Raft 论文翻译](https://github.com/maemual/raft-zh_cn/blob/master/raft-zh_cn.md)
-
-- [Raft 演示工具](https://raft.github.io/)
 
 - [Raft 如何处理上一任未提交的的 log](https://zhuanlan.zhihu.com/p/268299972)['](https://zhuanlan.zhihu.com/p/39105353)
 
@@ -853,7 +890,7 @@
     5. doGetBean 时，从三级缓存中获取 c 的早期引用。假设有切面，此时经过后置处理器 `AbstractAutoProxyCreator` 的 `getEarlyBeanReference()` 生成 `c` 的代理类对象（一号），@Transactional 注解生成代理也是通过插入切面来完成的，不会额外创建代理。代理类 `c`（一号） 赋给了 `d`
     6. initializeBean 初始化 `d`，有切面，生成代理类 `d`。然后经过 @Async 的后置处理器时，@Async 的后置处理器做了判断，如果传入的是代理类，则直接将增强添加到当前代理中，不会重新创建新的代理类。最终 d 初始化完成，成为代理类 `d`。`d` 没有暴露早期引用，无需进行循环依赖检查。
     7. 代理类 `d` 赋值给了 `c`
-    8. initializeBean 初始化 `c`，因为暴露早期引用时已经进行过切面代理，不再进行代理，然后就返回了原始 `c`！然后经过 @Async 的后置处理器时，因为 @Async 并没有实现早期引用逻辑，此时需要对原始 `c` 进行代理，生成代理类 `c`(二号)。
+    8. initializeBean 初始化 `c`，因为暴露早期引用时已经进行过切面代理，AbstractAutoProxyCreator 缓存中已经有了记录，wrapIfNecessary() 便不再进行代理，然后就返回了原始 `c`！然后经过 @Async 的后置处理器时，因为 @Async 并没有实现早期引用逻辑，此时需要对原始 `c` 进行代理，生成代理类 `c`(二号)。
 
         Spring 的原则是，早期暴露过了，此时后置处理时就不再动它了。
 
@@ -991,6 +1028,10 @@
 
 - [Linux中的文件描述符与打开文件之间的关系](https://blog.csdn.net/cywosp/article/details/38965239)
 
+## 通信协议
+
+- [通信协议之序列化](http://blog.chinaunix.net/uid-27105712-id-3266286.html)
+
 # 计算机网络
 
 - 为什么网络同时需要 IP 和 MAC 地址？
@@ -1048,16 +1089,6 @@
 
     `(ClassGenerator)ccp.getClassPool().get("com.alibaba.dubbo.common.bytecode.Proxy0").debugWriteFile()`
 
-# 数据结构
-
-- [Append-only B+ Tree](https://blog.csdn.net/lpstudy/article/details/83722007)
-
-- [LevelDB 设计与实现 —— LSM tree](https://blog.csdn.net/anderscloud/article/details/7182165)
-
-- [红黑树工具](https://rbtree.phpisfuture.com/)
-
-- [红黑树与 AVL 树比较](https://www.zhihu.com/question/19856999/answer/1254240739)
-
 # 设计模式
 
 - 简单工厂模式、工厂方法模式、抽象工厂模式
@@ -1095,3 +1126,7 @@
 # 工具包
 
 - [原码补码工具](http://www.atoolbox.net/Tool.php?Id=952)
+
+- [红黑树工具](https://rbtree.phpisfuture.com/)
+
+- [Raft 演示工具](https://raft.github.io/)
