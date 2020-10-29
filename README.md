@@ -37,7 +37,7 @@
 - [缓存](#缓存)
 - [开源框架](#开源框架)
   - [Spring](#spring)
-    - [源码解析](#源码解析)
+    - [源码解析✨](#源码解析)
   - [Dubbo](#dubbo)
   - [Kafka](#kafka)
   - [Zookeeper](#zookeeper)
@@ -216,7 +216,7 @@
 
 ### 偏向锁
 
-- [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)
+- [偏向锁的批量重偏向与批量撤销](https://www.cnblogs.com/LemonFive/p/11248248.html)✨
 
     假设有类 A。
 
@@ -686,7 +686,7 @@
 
 - [ApplicationContext 的继承体系](https://zhuanlan.zhihu.com/p/210268684)
 
-### 源码解析
+### 源码解析✨
 
 - [`@Configuration` 源码解析](https://mp.weixin.qq.com/s/5UvbeEnZBS7niAJw_f-6pQ) [](https://juejin.im/post/6860387888413343757)
 
