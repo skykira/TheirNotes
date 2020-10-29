@@ -24,8 +24,6 @@
   - [元空间](#元空间)
   - [字节码操作](#字节码操作)
   - [JVM 调优](#jvm-调优)
-- [DateBase](#datebase)
-  - [innodb 存储引擎](#innodb-存储引擎)
 - [分布式](#分布式)
   - [分布式算法](#分布式算法)
     - [Paxos](#paxos)
@@ -34,6 +32,10 @@
   - [分布式锁](#分布式锁)
     - [Redis 分布式锁](#redis-分布式锁)
   - [分布式事务](#分布式事务)
+- [MySQL](#mysql)
+  - [查询语句](#查询语句)
+  - [基本原理](#基本原理)
+  - [innodb 存储引擎✨](#innodb-存储引擎)
 - [缓存](#缓存)
 - [开源框架](#开源框架)
   - [Spring](#spring)
@@ -492,98 +494,6 @@
 
 - [jmap 指令慎用](https://blog.csdn.net/seeJavaDocs/article/details/53643227)
 
-# DateBase
-
-- [MySQL LEFT JOIN/ INNER JOIN/RIGHT JOIN 执行过程](https://learnku.com/articles/27701)
-
-- [MySQL 多表 Join (表连接) 和 Where 间的执行顺序：`nested loop join` 机制](https://blog.csdn.net/qq_27529917/article/details/78447882)
-
-    每 Join 一次后执行 where 过滤结果集，交叉执行。
-
-- [利用 `sum()` 统计列中某个值的数目](https://blog.csdn.net/lavorange/article/details/25004181)
-
-- [MySQL 组内排序](https://www.jianshu.com/p/717c4bdad462)
-
-- [MVCC 是否解决了幻读](https://segmentfault.com/a/1190000020680168)
-
-- [数据库事务中的一致性](https://www.zhihu.com/question/31346392)
-
-- [Innodb 双写防止 `partial page write`](https://blog.csdn.net/jolly10/article/details/79791574)
-
-- [ICP(Index Condition Pushdown) 索引下推](https://database.51cto.com/art/201907/599968.htm)
-
-    针对辅助索引能覆盖到的列，将 where 条件的判断下推到存储引擎层。也就是，覆盖索引中，本来使用不到索引的过滤条件，在回表前提前完成了过滤，即为索引条件下推。
-
-- [Mysql 意向锁](https://blog.csdn.net/zcl_love_wx/article/details/82015281)
-
-    意向锁是表级锁，申请行级锁时，由数据库自动提前申请，保证了行级锁与表级锁的共存。
-
-- [水平分库扩展](https://www.cnblogs.com/barrywxx/p/11532122.html)
-
-    成倍扩容，提前双写。
-
-- [in 和 exist 区别](https://blog.csdn.net/wqc19920906/article/details/79800374)
-
-    in 会缓存表达式中的数据，是在内存中操作，但需要遍历 B 表。
-    exist 不会缓存数据，但对于 A 中的每一条数据并不需要遍历 B 表。
-
-    in 子查询可以优化为半连接。例如，物化表时，内连接可自动优化左右连接。而且，总能转换为 exist 语句。
-
-- [channge buffer](https://dev.mysql.com/doc/refman/8.0/en/innodb-change-buffer.html)
-
-    在内存中，`channge buffer` 占用了缓冲池的一部分。在磁盘上，`channge buffer` 是系统表空间的一部分，当数据库服务器关闭时，对辅助索引的更改将存储在其中。
-
-- [LSN](https://www.cnblogs.com/drizzle-xu/p/9713378.html)
-
-    系统最大 LSN > redo 日志中的 > 脏页中的 > checkpoint 中的
-
-- [主从分离，从库同样有读写的负荷为什么会提升性能?](https://zhuanlan.zhihu.com/p/34782828)
-
-- [optimizer trace 详解](http://blog.itpub.net/28218939/viewspace-2658978/)
-
-- [MySQL 8.0 关于 GROUP BY 的知识点理解](https://zhuanlan.zhihu.com/p/169799791)
-
-- [INSERT ... ON DUPLICATE KEY UPDATE产生death lock死锁原理](https://blog.csdn.net/pml18710973036/article/details/78452688)
-
-    同时持有了 S 锁和 X 锁。
-
-- [自增 ID 导致主从不一致](https://blog.csdn.net/Saintyyu/article/details/104330881)
-
-## innodb 存储引擎
-
-- 独立表空间的物理结构
-
-    表空间由区构成，每256个区组成一个组，段是一个逻辑概念，每个区包含64个页。
-
-    每个索引包含两个段，叶子段和非叶子段。段由区的链表构成，由元数据结构 INODE Entry 描述，该结构持有链表的起始节点以及段中位于碎片区的页的定位。
-
-    段的元数据结构 INODE Entry 统一存储于表空间第一个区的第三个页面，该页面类型为 INODE 类型，多个此类页面由链表相连接。
-
-    每个组的第一个区的第一个页中，存储了该组内 256 个区对应的元数据结构 XDES Entry，每个 XDES Entry 中有每个区内 64 个页是否空闲的 bitmap。
-
-    每个索引两个段，索引的根页面的 Page Header 部分的两个 Segment Header 结构存储了指向该索引两个段的指针。另，在系统表空间第一个区的第七个页 Data Directory Header 中，存储了各个索引的元数据信息，其中包含了索引的根页面位置。
-
-    因此，从数据字典的索引表中，找到索引根页面的位置，然后得到索引两个段的 INODE Entry 的位置，然后可以寻得该段内所有区或者零碎页。
-
-- in 子查询转化为 semi join 的实现方法
-
-    1. table pullout 子查询表搜索条件只有主键或者唯一索引列时，因为不会出现重复，可以直接转为内连接
-
-    2. duplicate weedout 对半连接后的结果集，构建临时表，消除重复
-    3. LooseScan 如果将子查询表作为驱动表，且能够使用到该表的索引时，可以只取相同索引值第一个，相当于分组，然后进行内连接
-    4. Semi-join Materialization 为子查询建立物理表，然后内连接
-    5. FirstMatch 外层表的每一条数据，与内层表进行匹配，匹配成功一次，便不再仅需进行匹配
-
-    > 将子查询转换为半连接或是 `Exist` 条件的好处是，可能可以帮助子查询使用到索引。
-
-- [InnoDB recovery过程解析](https://sq.163yun.com/blog/article/172546631668785152)
-
-- 崩溃恢复机制
-
-    当mysql重启进入崩溃恢复时,首先利用redo恢复数据库的整体一致性,然后会根据保存binlog是否完整来决定事务重做或者回滚,如果binlog事务本身包含commit,则进行重做,否则回滚.
-
-- [MySQL更新语句是如何执行的](https://zhuanlan.zhihu.com/p/146968292)
-
 # 分布式
 
 ## 分布式算法
@@ -652,6 +562,96 @@
     为了解决这个同步阻塞的问题，3PC 在参与者中也引入了超时机制——超时未收到 doCommit 消息，便自动提交。如此定会有一致性问题出现，所以 3PC 又多加了一个 canCommit 阶段，当改阶段确认通过后，后续失败的概率会降低，以此通过牺牲一定的一致性，提高了可用性。
 
     2PC 这个分布式事务协议通常是在 DB 层面实现，TCC 则相当于应用层面的 2PC，通过业务逻辑实现，能够允许程序自定义数据库操作粒度。
+
+# MySQL 
+
+## 查询语句
+
+- [INSERT ... ON DUPLICATE KEY UPDATE产生death lock死锁原理](https://blog.csdn.net/pml18710973036/article/details/78452688)
+
+    同时持有了 S 锁和 X 锁。
+
+- [利用 `sum()` 统计列中某个值的数目](https://blog.csdn.net/lavorange/article/details/25004181)
+
+    sum() 统计时可以添加条件
+
+- [MySQL 组内排序: 分组查询每组的前n条记录](https://www.jianshu.com/p/717c4bdad462)
+
+- [optimizer trace 详解](http://blog.itpub.net/28218939/viewspace-2658978/)
+
+## 基本原理
+
+- [数据库事务中的一致性](https://www.zhihu.com/question/31346392)
+
+- [Innodb 双写防止 `partial page write`](https://blog.csdn.net/jolly10/article/details/79791574)
+
+- [ICP(Index Condition Pushdown) 索引下推](https://database.51cto.com/art/201907/599968.htm)
+
+    针对辅助索引能覆盖到的列，将 where 条件的判断下推到存储引擎层。也就是，覆盖索引中，本来使用不到索引的过滤条件，在回表前提前完成了过滤，即为索引条件下推。
+
+- [Mysql 意向锁](https://blog.csdn.net/zcl_love_wx/article/details/82015281)
+
+    意向锁是表级锁，申请行级锁时，由数据库自动提前申请，保证了行级锁与表级锁的共存。
+
+- [in 和 exist 区别](https://blog.csdn.net/wqc19920906/article/details/79800374)
+
+    in 会缓存表达式中的数据，是在内存中操作，但需要遍历 B 表。
+    exist 不会缓存数据，但对于 A 中的每一条数据并不需要遍历 B 表。
+
+    in 子查询可以优化为半连接。例如，物化表时，内连接可自动优化左右连接。而且，总能转换为 exist 语句。
+
+- [channge buffer](https://dev.mysql.com/doc/refman/8.0/en/innodb-change-buffer.html)
+
+    在内存中，`channge buffer` 占用了缓冲池的一部分。在磁盘上，`channge buffer` 是系统表空间的一部分，当数据库服务器关闭时，对辅助索引的更改将存储在其中。
+
+- [LSN](https://www.cnblogs.com/drizzle-xu/p/9713378.html)
+
+    系统最大 LSN > redo 日志中的 > 脏页中的 > checkpoint 中的
+
+- [主从分离，从库同样有读写的负荷为什么会提升性能?](https://zhuanlan.zhihu.com/p/34782828)
+
+- [自增 ID 导致主从不一致](https://blog.csdn.net/Saintyyu/article/details/104330881)
+
+- [水平分库扩展](https://www.cnblogs.com/barrywxx/p/11532122.html)
+
+    成倍扩容，提前双写。
+
+## innodb 存储引擎✨
+
+- 独立表空间的物理结构
+
+    表空间由区构成，每256个区组成一个组，段是一个逻辑概念，每个区包含64个页。
+
+    每个索引包含两个段，叶子段和非叶子段。段由区的链表构成，由元数据结构 INODE Entry 描述，该结构持有链表的起始节点以及段中位于碎片区的页的定位。
+
+    段的元数据结构 INODE Entry 统一存储于表空间第一个区的第三个页面，该页面类型为 INODE 类型，多个此类页面由链表相连接。
+
+    每个组的第一个区的第一个页中，存储了该组内 256 个区对应的元数据结构 XDES Entry，每个 XDES Entry 中有每个区内 64 个页是否空闲的 bitmap。
+
+    每个索引两个段，索引的根页面的 Page Header 部分的两个 Segment Header 结构存储了指向该索引两个段的指针。另，在系统表空间第一个区的第七个页 Data Directory Header 中，存储了各个索引的元数据信息，其中包含了索引的根页面位置。
+
+    因此，从数据字典的索引表中，找到索引根页面的位置，然后得到索引两个段的 INODE Entry 的位置，然后可以寻得该段内所有区或者零碎页。
+
+- in 子查询转化为 semi join 的实现方法
+
+    1. table pullout 子查询表搜索条件只有主键或者唯一索引列时，因为不会出现重复，可以直接转为内连接
+
+    2. duplicate weedout 对半连接后的结果集，构建临时表，消除重复
+    3. LooseScan 如果将子查询表作为驱动表，且能够使用到该表的索引时，可以只取相同索引值第一个，相当于分组，然后进行内连接
+    4. Semi-join Materialization 为子查询建立物理表，然后内连接
+    5. FirstMatch 外层表的每一条数据，与内层表进行匹配，匹配成功一次，便不再仅需进行匹配
+
+    > 将子查询转换为半连接或是 `Exist` 条件的好处是，可能可以帮助子查询使用到索引。
+
+- [InnoDB recovery过程解析](https://sq.163yun.com/blog/article/172546631668785152)
+
+- 崩溃恢复机制
+
+    当mysql重启进入崩溃恢复时,首先利用redo恢复数据库的整体一致性,然后会根据保存binlog是否完整来决定事务重做或者回滚,如果binlog事务本身包含commit,则进行重做,否则回滚.
+
+- [MySQL更新语句是如何执行的](https://zhuanlan.zhihu.com/p/146968292)
+
+- [MVCC 是否解决了幻读](https://segmentfault.com/a/1190000020680168)
 
 # 缓存
 
