@@ -46,12 +46,16 @@
     - [zab 原理解析](#zab-原理解析)
   - [Tomcat](#tomcat)
   - [Netty](#netty)
+    - [内存管理](#内存管理)
+    - [底层原理](#底层原理)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
+  - [NIO](#nio)
 - [通信协议](#通信协议)
 - [解决方案](#解决方案)
   - [负载均衡](#负载均衡)
   - [SSO](#sso)
+  - [点赞评论计数设计](#点赞评论计数设计)
 - [编程素养](#编程素养)
   - [设计模式](#设计模式)
 - [工具包](#工具包)
@@ -203,6 +207,10 @@
     因此，线程池的设计中，Doug Lea 在所有可能导致线程池产终止的地方安插了 `tryTerminated()`，尝试终止线程池，在其中判断如果线程池已经进入终止流程，没有任务等待执行了，但线程池还有线程，便中断唤醒一个空闲线程。当该线程被唤醒继续运行到退出时，会继续传播中断行为。
 
 - [UncaughtExceptionHandler 解析](https://www.jianshu.com/p/f22efc8ef594)
+
+- [weakCompareAndSet() 解析](https://www.jianshu.com/p/55a66113bc54)
+
+    `weakCompareAndSet()` 底层不会创建任何 happen-before 的保证，也就是不会对 volatile 字段操作的前后加入内存屏障。因此就无法保证多线程操作下对除了 weakCompareAndSet 操作的目标变量(该目标变量一定是一个 volatile 变量)之其他的变量读取和写入数据的正确性。
 
 ### AQS
 
@@ -482,6 +490,10 @@
 
 - [metaspace 与 DirectByteBuffer 并无关系](https://www.zhihu.com/question/399007267/answer/1260691185)
 
+- [JDK的运行时常量池、字符串常量池、静态常量池储存位置](https://zhuanlan.zhihu.com/p/206852587)['](https://blog.csdn.net/weixin_43232955/article/details/107411378)
+
+    JDK 8 起，字符串常量池和类的静态变量还是存储在堆中。类的类型、成员变量、方法信息，和运行时常量池（包括，JIT 代码缓存和类静态常量池中的数据）存储在元空间中。
+
 ## 字节码操作
 
 - [理解字节码增强工具包 Instrumentation ](https://www.throwable.club/2019/06/29/java-understand-instrument-first/)
@@ -564,6 +576,30 @@
     2PC 这个分布式事务协议通常是在 DB 层面实现，TCC 则相当于应用层面的 2PC，通过业务逻辑实现，能够允许程序自定义数据库操作粒度。
 
 # MySQL 
+
+[数据库三范式与反范式](https://zhuanlan.zhihu.com/p/77771583)
+
+- 第一范式：属性不可再分
+
+    如若某列包含两个属性，类似商品和价格，那么针对价格进行查询时，其中某一个属性与其它属性进行联合索引时，都是不够简洁明晰的。
+
+- 第二范式：消除部分依赖
+
+    (学号, 课程名称) → (姓名, 年龄, 成绩, 学分)
+
+    以👆为例，学号和课程，能够唯一定位到学生成绩。姓名仅依赖学号，学分仅依赖课程，本来一条(课程)->(学分)就能够代表的关系，现在却冗余了多份。
+
+- 第三范式：消除传递依赖
+
+    (学号) → (姓名, 年龄, 所在学院, 学院地点, 学院电话)
+
+    以👆为例，学号决定学生的学院，学院决定学院电话，本来一条(学院)->(学院电话)就能表示的关系，现在冗余了多份。
+
+满足三范式的数据库设计，能够最大程度的保证数据库数据简洁无冗余，可以按独立的字段检索查询。
+
+但按照范式设计出来的表，第一，在解决数据冗余的同时，会生成许多表，导致了表数量的复杂性。第二，查询数据的时候，多表查询的时间远远高于单表查询的时间。
+
+具体场景具体分析，反范式的设计认为，一定的冗余，能够提高性能。
 
 ## 查询语句
 
@@ -983,6 +1019,38 @@
 
 - [netty 时间轮设计](https://zacard.net/2016/12/02/netty-hashedwheeltimer/)
 
+- [JDK Epoll 空轮询 bug](https://www.jianshu.com/p/3ec120ca46b2)
+
+### 内存管理
+
+- [Netty 内存管理模型](https://zhuanlan.zhihu.com/p/259819465)
+
+    内存对象池化的主要目的是提高内存的使用率。
+    
+    池化的简单实现思路，是在 JVM 堆内存上构建一层内存池，通过 allocate 方法获取内存池中的空间，通过 release 方法将空间归还给内存池。
+    
+    对象的生成和销毁，会大量地调用 allocate 和 release 方法，因此内存池面临碎片空间回收的问题，在频繁申请和释放空间后，内存池需要保证连续的内存空间，用于对象的分配。
+    
+    基于这个需求，有两种算法用于优化这一块的内存分配：伙伴系统和 slab 系统。
+    
+    - 伙伴系统，用完全二叉树管理内存区域，左右节点互为伙伴，每个节点代表一个内存块。内存分配将大块内存不断二分，直到找到满足所需的最小内存分片。内存释放会判断释放内存分片的伙伴（左右节点）是否空闲，如果空闲则将左右节点合成更大块内存。例如：ChunkList 的内存管理。
+
+    - slab 系统，主要解决内存碎片问题，将大块内存按照一定内存大小进行等分，形成相等大小的内存片构成的内存集。按照内存申请空间的大小，申请尽量小块内存或者其整数倍的内存，释放内存时，也是将内存分片归还给内存集。例如：TinySubPage 和 SmallSubPage。
+
+- [Netty对零拷贝三个层次的实现](https://zhuanlan.zhihu.com/p/88599349)
+
+### 底层原理
+
+- [Java NIO wakeup实现原理](https://my.oschina.net/7001/blog/1509533)
+
+    Selector的select()方法时，会阻塞。
+
+    pollWrapper(不同 Selector 实现，该结构不一样) 负责保存当前 selector 对象上注册的 FD，当调用 Selector 的 select() 方法时，会将pollWrapper的内存地址传递给内核，由内核负责轮训pollWrapper中的FD，一旦有事件就绪，将事件就绪的FD传递回用户空间，阻塞在select()的线程就会被唤醒。
+
+    以 WindowsSelectorImpl 为例，它在实例化时顺便实例化了一个管道实例 wakeupPipe，这个管道包含两个 wakeupSourceFd 和wakeupSinkFd 两个[文件描述符](https://www.yuque.com/myboy-ipf95/kgi7au/kh8vee)(进程可以通过文件描述符表定位自己已打开的各类输入输出流)。系统将 wakeupSourceFd 作为第一个 FD 加到 pollWrapper 中让系统进行监控，Selector 需要 wakeup() 的时候，就往 wakeupSinkFd 写入一字节的数据，它立即被发送到 wakeupPiepe 的 source 端，wakeupSourceFd 有了数据，Selector 便立即返回了。
+
+- [EpollSelectorImpl 实现原理](https://zhuanlan.zhihu.com/p/159346800)
+
 # Linux
 
 - Linux IO 模型
@@ -1082,6 +1150,16 @@
 
 - [KeepAlived 原理](https://blog.csdn.net/qq_24336773/article/details/82143367)
 
+## NIO
+
+- [IO 多路复用要搭配非阻塞 IO](https://www.zhihu.com/question/37271342)
+
+    select() 返回可读是可能可读，read() 时可能会没有数据。
+
+    - [使用epoll时需要将socket设为非阻塞吗？](https://www.zhihu.com/question/23614342/answer/61986309)
+    
+        以 epoll 为例，当使用阻塞式的 fd，数据从无到有会通知进程来读，但进程不知道有多少数据，当二次循环来读时，若没有数据，则进程被阻塞。
+
 # 通信协议
 
 - [通信协议之序列化](http://blog.chinaunix.net/uid-27105712-id-3266286.html)
@@ -1111,6 +1189,16 @@
 - [单点登录](https://juejin.im/entry/6844903782996770824#comment)['](https://zhuanlan.zhihu.com/p/25007591)
 
 - [JWT 的优缺点](https://www.cnblogs.com/nangec/p/12687258.html)
+
+## 点赞评论计数设计
+
+- [微博计数器的设计](https://blog.cydu.net/weidesign/2012/12/06/weibo-counter-service-design-for-velocity/)
+
+    1. 数据存储结构优化
+    2. 数据存储压缩
+    3. 冷热数据分离
+    4. 批量查询
+    5. 消息度列去重
 
 # 编程素养
 
