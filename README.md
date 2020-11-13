@@ -42,12 +42,13 @@
     - [源码解析✨](#源码解析)
   - [Dubbo](#dubbo)
   - [Kafka](#kafka)
+    - [底层原理✨](#底层原理)
   - [Zookeeper](#zookeeper)
     - [zab 原理解析](#zab-原理解析)
   - [Tomcat](#tomcat)
   - [Netty](#netty)
     - [内存管理](#内存管理)
-    - [底层原理](#底层原理)
+    - [底层原理](#底层原理-1)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
   - [NIO](#nio)
@@ -953,11 +954,25 @@
 
 - [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
 
+### 底层原理✨
+
 - [kafka 时间轮设计](https://blog.lovezhy.cc/2020/01/11/Kafka%E6%8C%87%E5%8D%97-%E6%97%B6%E9%97%B4%E8%BD%AE%E5%AE%9E%E7%8E%B0/)
 
-    currentTime 在有了 queue 之后，就没有其他作用了，主要就是在 add 方法中拦住即将过期或者已经过期的任务。
+    **个人见解**，kafka 时间轮通过 hash 使添加任务的时间复杂度降到 o(1)，同时通过刻度分组，使得延迟队列 delayQueue 的添加速度增快。
 
-    上级时间轮降级时，对于 timerTaskEntry 需要重新插入。
+    每个 timeWheel 持有自己的上一级时间轮。
+
+    每个 timeTask 持有自己的绝对时间，放入不同的 bucket 是根据绝对时间来的，所以无论 currentTime 是否推进都不影响 timeTask 添加到时间轮中。然后，被放入了 timeTask 的 bucket 的过期时间也会更新（同样根据任务的绝对时间来更新的）
+
+    delayQueue 中没有轮的概念，仅有持有绝对过期时间的 bucket，如果上个轮次的某个 bucket 被遍历出来，后来这个 bucket 的绝对过期时间更新了，就要重新添加进去。
+
+    currentTime 仅在有任务出 delayQueue 时被推进，否则不变。这不会导致问题，因为 delayQueue 中的 bucket 持有绝对过期时间。
+
+    currentTime，其实，唯一的作用是锚定多个时间轮，使得层级时间轮之间时间相对一致，否则 timeTask 添加到上级时间轮中时，可能会被执行掉。
+
+    对于最低一级时间轮来说，currentTime 的精确度完全不所谓，虽然它现在已经是无所谓的。执行任务前，它自然会被推进。
+
+    顺带一提，timeTask 的执行时通过添加 timeTask 的方法来顺便执行的（这样也同时兼容了时间轮的降级操作）。delayQueue 中的 bucket 时间到了后，先推进 currentTime，然后添加 timeTask，该执行的执行。
 
 ## Zookeeper
 
@@ -1051,6 +1066,9 @@
 
 - [EpollSelectorImpl 实现原理](https://zhuanlan.zhihu.com/p/159346800)
 
+- [ctx.channel().writeAndFlush()和ctx.writeAndFlush()的区别](https://blog.csdn.net/chehec2010/article/details/90643436)['](https://blog.csdn.net/qq_34827263/article/details/100729528)['](https://www.cnblogs.com/qdhxhz/p/10234908.html)
+
+    
 # Linux
 
 - Linux IO 模型
