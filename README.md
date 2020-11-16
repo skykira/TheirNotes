@@ -1084,6 +1084,14 @@
     
     AbstractNioMessageChannel第了两个2个抽象方法用来实现真正的结构化数据类型的读写: doReadMessages, doWriteMessage。
 
+- [Netty 服务端运行时]
+
+    NioServerSocketChannel 初始化时设置自己的 pipeline，会将 ServerBootstrapAcceptor 置于倒数第二的位置，之后在 bossGroup 中选择一个 NioEventLoop 完成 register ，然后开始监听。
+
+    每个 NioEventLoop 对象在 NioEventLoopGroup 实例化时被创建，创建时，openSelector() 会为每个 NioEventLoop 创建 selector。
+
+    当 NioServerSocketChannel 对应的 NioEventLoop 接收到 SelectionKey.OP_READ 或 SelectionKey.OP_ACCEPT 信号时，NioMessageUnsafe 的 read() 方法中，doReadMessages 会生成该链接对应的 NioSocketChannel，之后触发 pipeline，执行到 ServerBootstrapAcceptor 时，它会为新生成的 NioSocketChannel 对应的 pipeline 设置 childHandler（也就是 ChannelInitializer），同时将该 NioSocketChannel register 到 workerGroup 的一个 NioEventLoop 对象中，然后该 NioEventLoop 运行时将监听该 Channel。
+
 # Linux
 
 - Linux IO 模型
