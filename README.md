@@ -1066,9 +1066,24 @@
 
 - [EpollSelectorImpl 实现原理](https://zhuanlan.zhihu.com/p/159346800)
 
+- [NioEventLoop 源码解析](https://blog.csdn.net/TheLudlows/article/details/82961193)
+
+- [inBound 与 outBound 处理器](https://blog.csdn.net/weixin_41947378/article/details/108059942)['](https://zhuanlan.zhihu.com/p/104232421)
+
+    ChannelHandler 的方法提供具体的业务逻辑，ChannelHandlerContext 负责调用链的进行。ChannelHandlerAdaptor 继承了 ChannelHandler，其方法的默认实现为 直接调用 ChannelHandlerContext 的方法。
+
+    入站事件由远端数据触发，出站事件由用户代码触发。
+
 - [ctx.channel().writeAndFlush()和ctx.writeAndFlush()的区别](https://blog.csdn.net/chehec2010/article/details/90643436)['](https://blog.csdn.net/qq_34827263/article/details/100729528)['](https://www.cnblogs.com/qdhxhz/p/10234908.html)
 
+- [AbstractNioByteChannel 源码分析](https://www.jianshu.com/p/d82fc1c52805)['](https://www.cnblogs.com/brandonli/p/10210592.html)
+
+    对于 AbstractNioByteChannel 和 AbstractNioMessageChannel，这两个类主要实现read和write的框架，它们的实现大致相同AbstractNioByteChannel读写的是byte array，而AbstractNioMessageChannel读的时候会把byte array转换成结构化的对象，写的时候把结构化对象序列化成byte array。
     
+    AbstractNioByteChannel定义了3个抽象方法用来实现真正的读写操作: doReadBytes, doWriteBytes, doWriteFileRegion。
+    
+    AbstractNioMessageChannel第了两个2个抽象方法用来实现真正的结构化数据类型的读写: doReadMessages, doWriteMessage。
+
 # Linux
 
 - Linux IO 模型
