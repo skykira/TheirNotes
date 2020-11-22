@@ -974,6 +974,52 @@
 
     顺带一提，timeTask 的执行时通过添加 timeTask 的方法来顺便执行的（这样也同时兼容了时间轮的降级操作）。delayQueue 中的 bucket 时间到了后，先推进 currentTime，然后添加 timeTask，该执行的执行。
 
+- Kafka 客户端原理
+
+    客户端 NetworkClient 产生的消息分区后，发往各分区对应的 RecordAccumulator，多条消息在收集器中累积成为一条批记录，如果分区内的第一条批记录满了，则开始发送这条批记录。发送时，将不同分区的多条批记录按照服务端节点分组，构造 ClientRequest，然后发往对应节点。
+    
+    客户端的请求发送和响应接收通过 Selector 模式进行。Selector 轮询得到可读或可写事件时，通过 KafkaChannel 将处理逻辑通过传输层交给 SocketChannel 进行实际发送。
+
+    KafkaChannel 持有 Send 对象 和 NetworkReceive。Send 和 NetworkReceive 都用字节缓冲区来缓存通道中的数据，Send 包含一个缓冲区，NetworkReceive 包含两个缓冲区，一个普通缓冲区，还有一个 Size 缓冲区。实例化时，为 size 缓冲区分配  4 字节，当 size 缓冲区读满后，通过 size.getInt() 得到 NetworkReceive 普通缓冲区的大小，分配内存，并开始接收数据。
+
+- [Group coordinator & Group leader 与分区重分配](https://www.jianshu.com/p/a8461707d6ea)
+
+    关于 consumers 的维护，有两个重要的概念：group coordinator & group leader:
+    
+    1. group coordinator: 是特殊的 broker。consumers poll 消息 & commit 消费消息记录时，会发送 heartbeats 到 group coordinator 来同时告知自己的健康状况。
+    
+    2. group leader: 第一个加入 consumer group 的 consumer 就是该 group 的 group leader。group coordinator 会把 consumers 列表发给 group leader 来维护。group leader 负责 assign & reassign partitions。
+    
+    如果 consumer crashed／network failure，长时间没有发送 heartbeats 到 group coordinator 时，group coordinator 会认为该 consumer 失联，并通知 group leader rebalance partition，group leader 将 rebalance 的结果通知 group coordinator，由 coordinator 来通知 consumers 新的 partitions 关系。
+
+- [再均衡过程](https://www.zhihu.com/question/63892760/answer/214411241)
+
+    再均衡步骤：
+    
+    1. 第一阶段(FIND_COORDINATOR)
+
+        消费者找到本消费组对应的 GroupCoordinator 所在的 broker，并建立连接。查找时，会向集群中负载最小的节点发送 FindCoordinatorRequest 请求。
+
+    2. 第二阶段(JOIN GROUP)
+
+        消费者会向 GroupCoordinator 发送 JoinGroupRequest请求。请求中的 protocol_metadata 字段由 PartitionAssignor接口的 `subscription()` 方法得到。
+
+        如果是原消费者重新加入消费者组，发送请求前还会触发 ConsumerRebalanceListener 的 `onPartitionsRevoked()` 方法。
+
+        GroupCoordinator 收到请求后，为消费者组内的消费者选出一个 leader，并为消费者组选定一个分区分配策略。
+
+        然后，GroupCoordinator 返回 JoinGroupResponse。但，members 字段只有 leader 有数据。
+
+    3. 第三阶段( SYNC GROUP)
+
+        消费者组 leader 根据 GroupCoordinator 返回的分区策略完成具体的分区分配后，向 GroupCoordinator 发送 SyncGroupRequest 请求。所有消费者都会发送该请求，GroupCoordinator 将消费者组 leader 发送来的分配方案和消费者组的元数据一起存入 _consumer_offsets 主题中，然后将响应发送给各个消费者。
+
+        当消费者收到所属的分配方案之后会调用 PartitionAssignor 中的 `onAssignment()`方法。随后再调用 ConsumerRebalanceListener 中的 `OnPartitionAssigned()` 方法。之后开启心跳任务，消费者定期向服务端的 GroupCoordinator 发送 HeartbeatRequest 来确定彼此在线。
+
+    4. 第四阶段( HEARTBEAT)
+
+        正式开始消费前，消费者通过 OffsetFetchRequest 请求获取上次提交的消费位移并从此处继续消费。消费者通过向 GroupCoordinator 发送心跳来维持它们与消费组的从属关系，以及它们对分区的所有权关系。
+
 ## Zookeeper
 
 - [zookeeper 如何保证事务按顺序生效？](https://time.geekbang.org/column/article/239261)
@@ -1091,6 +1137,11 @@
     每个 NioEventLoop 对象在 NioEventLoopGroup 实例化时被创建，创建时，openSelector() 会为每个 NioEventLoop 创建 selector。
 
     当 NioServerSocketChannel 对应的 NioEventLoop 接收到 SelectionKey.OP_READ 或 SelectionKey.OP_ACCEPT 信号时，NioMessageUnsafe 的 read() 方法中，doReadMessages 会生成该链接对应的 NioSocketChannel，之后触发 pipeline，执行到 ServerBootstrapAcceptor 时，它会为新生成的 NioSocketChannel 对应的 pipeline 设置 childHandler（也就是 ChannelInitializer），同时将该 NioSocketChannel register 到 workerGroup 的一个 NioEventLoop 对象中，然后该 NioEventLoop 运行时将监听该 Channel。
+
+- 异步串行无锁化
+
+    1. 对于外部线程提交给 IO 线程的任务，以及 Handler 中业务任务的处理交给业务线程池，都需要通过 inEventLoop() 方法进行判断，减少了上下文切换。
+    2. MPSC 队列无锁队列提高性能。
 
 # Linux
 
