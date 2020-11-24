@@ -51,6 +51,8 @@
     - [底层原理](#底层原理-1)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
+  - [TCP](#tcp)
+  - [SOCKET](#socket)
   - [NIO](#nio)
 - [通信协议](#通信协议)
 - [解决方案](#解决方案)
@@ -994,6 +996,10 @@
 
 - [再均衡过程](https://www.zhihu.com/question/63892760/answer/214411241)
 
+    consumer caller thread 只有当 poll() 的时候才会知道到底 rebalance 有没有被 trigger，heartbeat thread 当收到 heartbeat error code 的时候只会 set 一个 flag，这个 flag 只有 caller thread 触发 poll() 的时候才会查看并发送joinRequest。
+
+    在 poll() 里面我们是用一个 do-while on pollOnce()，每次都会看一下那个 flag，所以会得知
+
     再均衡步骤：
     
     1. 第一阶段(FIND_COORDINATOR)
@@ -1199,6 +1205,8 @@
 
 - [Linux中的文件描述符与打开文件之间的关系](https://blog.csdn.net/cywosp/article/details/38965239)
 
+- [KeepAlived 原理](https://blog.csdn.net/qq_24336773/article/details/82143367)
+
 # 计算机网络
 
 - 为什么网络同时需要 IP 和 MAC 地址？
@@ -1206,6 +1214,8 @@
     - [历史原因](https://www.zhihu.com/question/21546408/answer/53576595)，TCP/IP（因特网） 完成了对异构网络间的互联互通，但没有定义物理层和数据链路层的具体细节，其需要运行于以太网等其它二层网络之上。
 
     - [功能原因](https://www.zhihu.com/question/21546408/answer/149670503)，IP 地址与地域相关，它虽然具有唯一标识作用，但不能唯一标识某台主机，MAC 地址才能唯一标识某台主机。如果仅有 IP 地址，主机 A IP 换了以后，发往主机 A 的消息不会发往 A 原来的 IP，而是会发送到 A 的 MAC 地址新对应的 IP 地址。所以，IP 用于路由，但无法永久唯一标识。
+
+## TCP
 
 - [TCP/IP 三次握手思考](https://blog.csdn.net/lengxiao1993/article/details/82771768?utm_medium=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
 
@@ -1220,6 +1230,14 @@
     - 当连接处于Listening状态时，Recv-Q表示全连接队列实际使用情况，Send-Q表示全连接队最大容量。
     - 当连接处于非Listening状态时，Recv-Q表示接受缓冲区还没有读取的数据大小，Send-Q表示发送缓冲区还没有被对端ACK的数据大小。
 
+- [TCP_NODELAY选项](https://www.jianshu.com/p/ccafdeda0b95)
+
+    TCP_NODELAY 关闭时，会开启 [Nagle 算法](https://www.cnblogs.com/postw/p/9710772.html)。
+
+    该算法要求一个 tcp 连接上最多只能有一个未被确认的未完成的小分组，在该分组 ack 到达之前不能发送其他的小分组，tcp 需要收集这些少量的分组，并在 ack 到来时以一个分组的方式发送出去。因此会有延迟。
+
+## SOCKET
+
 - [Socket 端口复用](https://bbs.csdn.net/topics/390945826)
 
     一般 TCP 的 SO_REUSEADDR 用于服务器，以便服务器崩溃重启时，可直接 Bind 处于 TIME_WAIT 状态的端口。
@@ -1233,14 +1251,6 @@
     一个进程可以与多个套接字关联，两个独立的进程不可以侦听同一端口。
     
     服务器可以使用多个子进程/线程为每个套接字提供服务。操作系统（特别是UNIX）在设计上允许子进程从父进程继承所有文件描述符（FD）。因此，只要进程通过父子关系与A相关联，便可以由更多进程A1，A2..监听进程A侦听的所有套接字。
-
-- [TCP_NODELAY选项](https://www.jianshu.com/p/ccafdeda0b95)
-
-    TCP_NODELAY 关闭时，会开启 [Nagle 算法](https://www.cnblogs.com/postw/p/9710772.html)。
-
-    该算法要求一个 tcp 连接上最多只能有一个未被确认的未完成的小分组，在该分组 ack 到达之前不能发送其他的小分组，tcp 需要收集这些少量的分组，并在 ack 到来时以一个分组的方式发送出去。因此会有延迟。
-
-- [KeepAlived 原理](https://blog.csdn.net/qq_24336773/article/details/82143367)
 
 ## NIO
 
