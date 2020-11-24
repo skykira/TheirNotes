@@ -62,6 +62,8 @@
   - [点赞评论计数设计](#点赞评论计数设计)
 - [编程素养](#编程素养)
   - [设计模式](#设计模式)
+  - [常用指令](#常用指令)
+    - [网络相关](#网络相关)
 - [工具包](#工具包)
 
 <!-- /TOC -->
@@ -1206,6 +1208,10 @@
 
 - [Linux中的文件描述符与打开文件之间的关系](https://blog.csdn.net/cywosp/article/details/38965239)
 
+- [Linux Pipeline 原理](https://blog.csdn.net/oguro/article/details/53841949)
+
+    匿名管道，内核中一小块缓冲区域。命名管道，会在文件系统中建立，可以用于任意进程之间通信。
+
 - [KeepAlived 原理](https://blog.csdn.net/qq_24336773/article/details/82143367)
 
 # 计算机网络
@@ -1218,7 +1224,13 @@
 
 ## HTTP
 
-- [当我们在谈论HTTP队头阻塞时，我们在谈论什么](https://blog.csdn.net/uxiad7442kmy1x86dtm3/article/details/79416171)
+- [http 版本特性](http://muyiy.cn/question/network/117.html)
+
+    http1.0: 无状态，无连接
+    http1.1: 长连接，管道化请求，缓存控制
+    http2.0: 多路复用，头部压缩，server push，二进制分帧
+
+- [当我们在谈论HTTP队头阻塞时，我们在谈论什么](https://blog.csdn.net/uxiad7442kmy1x86dtm3/article/details/79416171)['](https://blog.csdn.net/m0_37145844/article/details/109280985?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~sobaiduend~default-1-109280985.nonecase&utm_term=tcp%E9%98%9F%E5%A4%B4%E9%98%BB%E5%A1%9E&spm=1000.2123.3001.4430)
 
    HTTP/2 over TCP 解决了 http request 级别的队头阻塞问题，但应用层协议无法解决 TCP 传输层的对头阻塞问题。
 
@@ -1330,6 +1342,14 @@
     1. 简单工厂封装了创建对象的过程，调用就生产产品 A；
     2. 工厂方法模式封装了多个简单工厂，可以根据入参，生产不同的产品 A、B；
     3. 抽象工厂封装了工厂方法，可以根据入参，返回不同的工厂。
+
+## 常用指令
+
+### 网络相关
+
+ - [netstat](https://www.cnblogs.com/faberbeta/p/12981880.html)
+
+    查看 pid 与 port 的关系
 
 # 工具包
 
