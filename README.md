@@ -51,8 +51,9 @@
     - [底层原理](#底层原理-1)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
-  - [TCP](#tcp)
+  - [HTTP](#http)
   - [SOCKET](#socket)
+  - [TCP](#tcp)
   - [NIO](#nio)
 - [通信协议](#通信协议)
 - [解决方案](#解决方案)
@@ -1215,6 +1216,28 @@
 
     - [功能原因](https://www.zhihu.com/question/21546408/answer/149670503)，IP 地址与地域相关，它虽然具有唯一标识作用，但不能唯一标识某台主机，MAC 地址才能唯一标识某台主机。如果仅有 IP 地址，主机 A IP 换了以后，发往主机 A 的消息不会发往 A 原来的 IP，而是会发送到 A 的 MAC 地址新对应的 IP 地址。所以，IP 用于路由，但无法永久唯一标识。
 
+## HTTP
+
+- [当我们在谈论HTTP队头阻塞时，我们在谈论什么](https://blog.csdn.net/uxiad7442kmy1x86dtm3/article/details/79416171)
+
+   HTTP/2 over TCP 解决了 http request 级别的队头阻塞问题，但应用层协议无法解决 TCP 传输层的对头阻塞问题。
+
+## SOCKET
+
+- [Socket 端口复用](https://bbs.csdn.net/topics/390945826)
+
+    一般 TCP 的 SO_REUSEADDR 用于服务器，以便服务器崩溃重启时，可直接 Bind 处于 TIME_WAIT 状态的端口。
+
+    对于 TCP，我们不可能启动捆绑相同 IP 地址和相同端口号的多个服务器。
+
+    端口复用时，只有一个Socket可以得到数据。
+
+- [多个 Socket 监听同一端口](https://blog.51cto.com/ticktick/779866)['](https://stackoverflow.com/questions/3329641/how-do-multiple-clients-connect-simultaneously-to-one-port-say-80-on-a-server)['](https://blog.csdn.net/u011580175/article/details/80306414)
+
+    一个进程可以与多个套接字关联，两个独立的进程不可以侦听同一端口。
+    
+    服务器可以使用多个子进程/线程为每个套接字提供服务。操作系统（特别是UNIX）在设计上允许子进程从父进程继承所有文件描述符（FD）。因此，只要进程通过父子关系与A相关联，便可以由更多进程A1，A2..监听进程A侦听的所有套接字。
+    
 ## TCP
 
 - [TCP/IP 三次握手思考](https://blog.csdn.net/lengxiao1993/article/details/82771768?utm_medium=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.wap_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.nonecase)
@@ -1235,22 +1258,6 @@
     TCP_NODELAY 关闭时，会开启 [Nagle 算法](https://www.cnblogs.com/postw/p/9710772.html)。
 
     该算法要求一个 tcp 连接上最多只能有一个未被确认的未完成的小分组，在该分组 ack 到达之前不能发送其他的小分组，tcp 需要收集这些少量的分组，并在 ack 到来时以一个分组的方式发送出去。因此会有延迟。
-
-## SOCKET
-
-- [Socket 端口复用](https://bbs.csdn.net/topics/390945826)
-
-    一般 TCP 的 SO_REUSEADDR 用于服务器，以便服务器崩溃重启时，可直接 Bind 处于 TIME_WAIT 状态的端口。
-
-    对于 TCP，我们不可能启动捆绑相同 IP 地址和相同端口号的多个服务器。
-
-    端口复用时，只有一个Socket可以得到数据。
-
-- [多个 Socket 监听同一端口](https://blog.51cto.com/ticktick/779866)['](https://stackoverflow.com/questions/3329641/how-do-multiple-clients-connect-simultaneously-to-one-port-say-80-on-a-server)['](https://blog.csdn.net/u011580175/article/details/80306414)
-
-    一个进程可以与多个套接字关联，两个独立的进程不可以侦听同一端口。
-    
-    服务器可以使用多个子进程/线程为每个套接字提供服务。操作系统（特别是UNIX）在设计上允许子进程从父进程继承所有文件描述符（FD）。因此，只要进程通过父子关系与A相关联，便可以由更多进程A1，A2..监听进程A侦听的所有套接字。
 
 ## NIO
 
