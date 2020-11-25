@@ -621,6 +621,10 @@
 
 - [optimizer trace 详解](http://blog.itpub.net/28218939/viewspace-2658978/)
 
+- [索引JSON字段](https://developer.aliyun.com/article/303208)
+
+    在MySQL 5.7中，支持两种 Generated Column，即 Virtual Generated Column 和 Stored Generated Column，前者只将 Generated Column 保存在数据字典中（表的元数据），并不会将这一列数据持久化到磁盘上；后者会将 Generated Column 持久化到磁盘上，而不是每次读取的时候计算所得。
+
 ## 基本原理
 
 - [数据库事务中的一致性](https://www.zhihu.com/question/31346392)
