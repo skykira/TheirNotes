@@ -621,9 +621,13 @@
 
 - [optimizer trace 详解](http://blog.itpub.net/28218939/viewspace-2658978/)
 
-- [索引JSON字段](https://developer.aliyun.com/article/303208)
+- [索引 JSON 字段](https://developer.aliyun.com/article/303208)
 
     在MySQL 5.7中，支持两种 Generated Column，即 Virtual Generated Column 和 Stored Generated Column，前者只将 Generated Column 保存在数据字典中（表的元数据），并不会将这一列数据持久化到磁盘上；后者会将 Generated Column 持久化到磁盘上，而不是每次读取的时候计算所得。
+
+- [JSON 字段使用场景](https://juejin.cn/post/6844903737308381198#heading-1)
+
+    对于数据结构容易变化，数据表中仅有少部分记录需要的数据。
 
 ## 基本原理
 
@@ -959,6 +963,31 @@
 
     populateBean() 时，AnnotationInjectedBeanPostProcessor(实际为 ReferenceAnnotationBeanPostProcessor，属性 annotationType 为 @Reference) 作为 InstantiationAwareBeanPostProcessor，被调用其 postProcessPropertyValues() 方法（针对spring中，该方法在spring5.1以后被替换为 postProcessProperties()），该方法从缓存中得到当前 bean 的需要被注入的属性，执行 AnnotationInjectedBeanPostProcessor 中 AnnotatedFieldElement 的 inject() 方法，getInjectedObject() -> ReferenceAnnotationBeanPostProcessor.doGetInjectedBean() -> buildReferenceBeanIfAbsent(referencedBeanName|ReferenceBean 名称, reference|注释, injectedType|属性类型, getClassLoader()) 得到 ReferenceBean，并将 beanFactory 中的 dubbo 配置类设置到其中。最后，将该 ReferenceBean 生成 InvocationHandler，如果该服务为远端服务，则在此时进行初始化，设置 ReferenceBean 的 ref 属性，然后创建jdk动态代理，注入成功。
 
+- DubboProtocol refer() 为 DubboInvoker 构建的 ExchangeClient
+
+    - DubboProtocol
+    1. Protocol.refer() 生成 Invoker，DubboProtocol 生成 DubboInvoker
+    2. 开始为 DubboInvoker 构建 ExchangeClient
+    3. initClient() 中 Exchangers.connect(url, requestHandler) 完成初始化 client，完成后在外面包裹 `ReferenceCountExchangeClient`
+        - requestHandler 为匿名内部类`ExchangeHandlerAdapter`，真正处理 `ExchangeChannel channel, Object message` 
+    - Exchangers
+    1. connect() 方法委托给 Exchanger 的实现类 HeaderExchanger
+    - HeaderExchanger
+    1. HeaderExchanger 自然是创建 HeaderExchangerClient(Client client, boolean needHeartbeat)，传入的 NettyClient 被包装为 HeaderExchangeChannel
+    - Transporters
+    1. Transporters.connect(url, new `DecodeHandler`(new `HeaderExchangeHandler`(handler)))，connect() 方法委托给 Transporter 的实现类，NettyTransporter
+    - NettyTransporter
+    1. new NettyClient(url, listener) 创建基于 Netty 的客户端。
+    - NettyClient
+    1. super(url, wrapChannelHandler(url, handler));对 handler 进行最后的包裹。
+    2. ChannelHandlers.wrap(handler, url);
+    - ChannelHandlers
+    1. new `MultiMessageHandler`(new `HeartbeatHandler`(ExtensionLoader.getExtensionLoader(Dispatcher.class).getAdaptiveExtension().dispatch(handler, url)));
+    - Dispatcher 对应于 Dubbo 的线程模型
+    1. Dispatcher 不同的实现类，对应不同的 handler。以 AllDispatcher 为例，创建 `AllChannelHandler`(handler, url)
+
+    所以说，[ChannelHandler](https://blog.csdn.net/yuanshangshenghuo/article/details/108631503) 最外层是 MultiMessageHandler，最内层是 requestHandler，真正处理 channel 数据。发送接收数据，从外到内。
+
 ## Kafka
 
 - [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
@@ -981,7 +1010,7 @@
 
     对于最低一级时间轮来说，currentTime 的精确度完全不所谓，虽然它现在已经是无所谓的。执行任务前，它自然会被推进。
 
-    顺带一提，timeTask 的执行时通过添加 timeTask 的方法来顺便执行的（这样也同时兼容了时间轮的降级操作）。delayQueue 中的 bucket 时间到了后，先推进 currentTime，然后添加 timeTask，该执行的执行。
+    顺带一提，timeTask 的执行是通过重新插入 timeTask 的方法来顺便执行的（这样也同时兼容了时间轮的降级操作）。delayQueue 中的 bucket 时间到了后，先推进 currentTime，然后添加 timeTask，该执行的执行。
 
 - Kafka 客户端原理
 
@@ -1238,6 +1267,8 @@
 
    HTTP/2 over TCP 解决了 http request 级别的队头阻塞问题，但应用层协议无法解决 TCP 传输层的对头阻塞问题。
 
+- [TCP/IP, SPDY, WebSocket 三者之间的关系](https://www.zhihu.com/question/20097129/answer/15017791)
+
 ## SOCKET
 
 - [Socket 端口复用](https://bbs.csdn.net/topics/390945826)
@@ -1289,6 +1320,8 @@
 
 - [通信协议之序列化](http://blog.chinaunix.net/uid-27105712-id-3266286.html)
 
+- [Dubbo 3.0 前瞻：常用协议对比及 RPC 协议新形态探索](https://mp.weixin.qq.com/s/x0pZcsKkFhcwClJJL3X7AQ)
+
 # 解决方案
 
 ## 负载均衡
@@ -1298,6 +1331,8 @@
 - [lvs 会接受客户端的请求，为什么说 lvs 没有流量产生？](https://www.zhihu.com/question/36868056/answer/151700242)
 
     对于 LVS 三种代理方式中的两种 —— IP Tunnelling 和 Direct Routing，客户端请求的报文每次会经过 lvs 转发到 realserver，但 realserver 回复的报文不会经过lvs。
+
+- [长连接与负载均衡](https://mp.weixin.qq.com/s/LKGzc6XBAWYdskVQQJFLHw)
 
 ## SSO
 
