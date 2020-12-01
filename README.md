@@ -352,6 +352,17 @@
 
     concurrent-abortable-preclean 用于调度 remark 的开始时机，防止连续 STW。
 
+- [CMS 垃圾收集过程](https://www.bilibili.com/read/cv6830986/)
+
+    卡表还有一个作用就是发生YGC的时候用来查看有没有老年代的对象引用新生代，这样就不用每次都遍历老年代的对象的。
+
+    card table只有一份，既要用来支持young GC又要用来支持CMS。每次young GC过程中都涉及重置和重新扫描card table，这样是满足了young GC的需求，但却破坏了CMS的需求——CMS需要的信息可能被young GC给重置掉了。
+
+    为了避免丢失信息，就在card table之外另外加了一个bitmap叫做mod-union table。在CMS concurrent marking正在运行的过程中，每当发生一次young GC，当young
+    GC要重置card table里的某个记录时，就会更新 [mod-union table](https://blog.csdn.net/mark__zeng/article/details/48751053) 对应的bit。
+
+    这样，最后到CMS remark的时候，当时的card table外加mod-union table就足以记录在并发标记过程中old gen发生的所有引用变化了。
+
 ### G1
 
 - [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
@@ -629,6 +640,8 @@
 
     对于数据结构容易变化，数据表中仅有少部分记录需要的数据。
 
+- [分库分表后，跨库分页查询方案](https://blog.csdn.net/uiuan00/article/details/102716457)
+
 ## 基本原理
 
 - [数据库事务中的一致性](https://www.zhihu.com/question/31346392)
@@ -666,6 +679,8 @@
 
     成倍扩容，提前双写。
 
+- [分库分表，事务问题解决方案](https://mp.weixin.qq.com/s/lgxP0mzwwrV05aUmYb7hJA)['](https://mp.weixin.qq.com/s/9G-_U6di0wgawJXKeVCM-w)
+
 ## innodb 存储引擎✨
 
 - 独立表空间的物理结构
@@ -695,7 +710,7 @@
 
 - [InnoDB recovery过程解析](https://sq.163yun.com/blog/article/172546631668785152)
 
-- 崩溃恢复机制
+- [崩溃恢复机制](https://www.zhihu.com/question/287892854/answer/1472244704)
 
     当mysql重启进入崩溃恢复时,首先利用redo恢复数据库的整体一致性,然后会根据保存binlog是否完整来决定事务重做或者回滚,如果binlog事务本身包含commit,则进行重做,否则回滚.
 
