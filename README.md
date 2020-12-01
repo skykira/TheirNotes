@@ -335,8 +335,15 @@
 - [缓存行伪共享 (False Sharing)](http://ifeve.com/falsesharing/)
 
 - [理解 TLAB](https://www.jianshu.com/p/2343f2c0ecc4)
+- [理解 PLAB](https://blog.csdn.net/superfjj/article/details/107220117)
+
+    线程位于 Survivor 区和 old 区的分配缓冲区。
 
 ## 垃圾收集
+
+- [OopMap](https://blog.csdn.net/anyan8023/article/details/74914623?utm_source=blogxgwz3)
+
+    每个方法可能会有好几个oopMap，就是根据 safepoint 把一个方法的代码分成几段，每一段代码一个 oopMap，作用域自然也仅限于这一段代码。
 
 ### CMS
 
