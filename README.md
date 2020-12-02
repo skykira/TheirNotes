@@ -13,6 +13,7 @@
     - [函数式编程](#函数式编程)
     - [Java 安全](#java-安全)
   - [Java 并发](#java-并发)
+    - [volatile](#volatile)
     - [AQS](#aqs)
     - [偏向锁✨](#偏向锁)
   - [Java IO](#java-io)
@@ -217,6 +218,18 @@
 - [weakCompareAndSet() 解析](https://www.jianshu.com/p/55a66113bc54)
 
     `weakCompareAndSet()` 底层不会创建任何 happen-before 的保证，也就是不会对 volatile 字段操作的前后加入内存屏障。因此就无法保证多线程操作下对除了 weakCompareAndSet 操作的目标变量(该目标变量一定是一个 volatile 变量)之其他的变量读取和写入数据的正确性。
+
+- [CompletableFuture 的执行模型](https://zhuanlan.zhihu.com/p/88321058)
+
+    Async 后缀代表将任务交给默认或指定线程池，不带 Async 后缀的方法，可能使用上一个方法的线程，也可能使用主线程，二者选一。
+
+### volatile
+
+- [volatile 的底层实现](https://www.zhihu.com/question/65372648/answer/415311977)
+
+    通过 Ringbus + MESI协议的方式，被称为 Cache Locking。
+
+    MESI大致的意思是：若干个CPU核心通过ringbus连到一起。每个核心都维护自己的Cache的状态。如果对于同一份内存数据在多个核里都有cache，则状态都为S（shared）。一旦有一核心改了这个数据（状态变成了M），其他核心就能瞬间通过ringbus感知到这个修改，从而把自己的cache状态变成I（Invalid），并且从标记为M的cache中读过来。同时，这个数据会被原子的写回到主存。最终，cache的状态又会变为S。
 
 ### AQS
 
