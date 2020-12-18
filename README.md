@@ -7,6 +7,7 @@
   - [LSM tree](#lsm-tree)
   - [红黑树与 AVL 树](#红黑树与-avl-树)
   - [LinkedBlockingQueue 与 ArrayBlockingQueue](#linkedblockingqueue-与-arrayblockingqueue)
+  - [FST（Finite State Transducers） 有限状态转移机](#fstfinite-state-transducers-有限状态转移机)
 - [Java](#java)
   - [Java 基础](#java-基础)
     - [Reference](#reference)
@@ -38,6 +39,7 @@
   - [基本原理](#基本原理)
   - [innodb 存储引擎✨](#innodb-存储引擎)
 - [缓存](#缓存)
+  - [Redis](#redis)
 - [开源框架](#开源框架)
   - [Spring](#spring)
     - [源码解析✨](#源码解析)
@@ -50,6 +52,8 @@
   - [Netty](#netty)
     - [内存管理](#内存管理)
     - [底层原理](#底层原理-1)
+  - [Sentinel](#sentinel)
+    - [底层原理](#底层原理-2)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
   - [HTTP](#http)
@@ -107,7 +111,7 @@
 
 ## 红黑树与 AVL 树
 
-- [红黑树与 AVL 树比较](https://www.zhihu.com/question/19856999/answer/1254240739)
+- [红黑树与 AVL 树比较](https://www.zhihu.com/question/19856999)
 
     红黑树类似添加了缓存的 AVL 树。
 
@@ -122,6 +126,10 @@
 - [为什么ArrayBlockingQueue不使用LinkedBlockingQueue类似的双锁实现?](https://blog.csdn.net/icepigeon314/article/details/93792519)
 
     首先，ArrayBlockingQueue 可以使用双锁实现，设计者可能认为 Java 并不需要支持两个类似的 BlockingQueue。
+
+## FST（Finite State Transducers） 有限状态转移机
+
+- [FST原理简析](https://segmentfault.com/p/1210000018087250/read)
 
 # Java
 
@@ -235,6 +243,90 @@
 
 - [AbstractQueuedSynchronizer 源码解读](https://www.cnblogs.com/micrari/p/6937995.html)
 
+    1. PROPAGATE 状态存在的意义
+    
+        根据低版本的 JDK BUG，当并发 doReleaseShared() 释放锁时，释放线程1释放锁，将 head 状态改为 0，等待线程1被唤醒，开始尝试获得锁。
+
+        ```java
+        //并发释放共享锁的时候，可能会设置 PROPAGATE 状态
+        private void doReleaseShared() {
+            for (;;) {
+                Node h = head;
+                if (h != null && h != tail) {
+                    int ws = h.waitStatus;
+                    if (ws == Node.SIGNAL) {
+                        if (!h.compareAndSetWaitStatus(Node.SIGNAL, 0))
+                            continue;            // loop to recheck cases
+                        unparkSuccessor(h);
+                    }
+                    //为了保证传播，当上一个释放线程唤醒等待线程后，等待线程判断是否要唤醒后继节点时有判断依据，在当前 head.ws = 0 的时候，我得设置 ws = PROPAGATE。
+                    else if (ws == 0 &&
+                             !h.compareAndSetWaitStatus(0, Node.PROPAGATE))
+                        continue;                // loop on failed CAS
+                }
+                //挺关键的，循环内，我要么对原head完成状态变更，要么我继续循环
+                if (h == head)                   // loop if head changed
+                    break;
+            }
+        }
+
+        private void doAcquireShared(int arg) {
+            final Node node = addWaiter(Node.SHARED);
+            boolean interrupted = false;
+            try {
+                for (;;) {
+                    final Node p = node.predecessor();
+                    if (p == head) {
+                        //此时，释放线程1释放了一个锁，当前线程尝试获取成功后，没有锁了（以 semaphore 为例），r = 0
+                        int r = tryAcquireShared(arg);
+                        //此时，释放线程2又释放了一个锁，但以前的代码因为 head 的 ws = 0，不再继续调用 unparkSuccessor。现在有了 PROPAGATE 状态，对于共享锁释放，如果 ws = 0，会设置 head 的 ws 为 PROPAGATE。
+                        if (r >= 0) {
+                            setHeadAndPropagate(node, r);
+                            p.next = null; // help GC
+                            return;
+                        }
+                    }
+                    if (shouldParkAfterFailedAcquire(p,     node))
+                        interrupted |=  parkAndCheckInterrupt();
+                }
+            } catch (Throwable t) {
+                cancelAcquire(node);
+                throw t;
+            } finally {
+                if (interrupted)
+                    selfInterrupt();
+            }
+        }
+
+        //设置 head 并传播
+        private void setHeadAndPropagate(Node node, int propagate) {
+            Node h = head; // Record old head for check below
+            setHead(node);
+            /*
+             * Try to signal next queued node if:
+             *   Propagation was indicated by caller,
+             *     or was recorded (as h.waitStatus either before
+             *     or after setHead) by a previous operation
+             *     (note: this uses sign-check of waitStatus because
+             *      PROPAGATE status may transition to SIGNAL.)
+             * and
+             *   The next node is waiting in shared mode,
+             *     or we don't know, because it appears null
+             *
+             * The conservatism in both of these checks may cause
+             * unnecessary wake-ups, but only when there are multiple
+             * racing acquires/releases, so most need signals now or soon
+             * anyway.
+             */
+            //此时，虽然 propagate 也就是尝试获取锁的返回值 r = 0，因为在尝试获取锁和现在判断是否要传播之间，的确有释放线程2释放了锁，所以要继续判断。h!=null并且，h.waitStatus = PROPAGATE，证明的确需要唤醒后继线程。如果此时，释放线程2还未完成之前 head 的 ws 的状态改变，释放线程2会检测到 head 指针已经指向了新的节点，释放线程2后重新循环，确保会调用 unparkSuccessor() 或者是在 head 更新之前，完成PROPAGATE状态的变更
+            if (propagate > 0 || h == null || h.waitStatus < 0 ||
+                (h = head) == null || h.waitStatus < 0) {
+                Node s = node.next;
+                if (s == null || s.isShared())
+                    doReleaseShared();
+            }
+        }
+
 - [CLH、MCS队列锁](https://www.cnblogs.com/sanzao/p/10567529.html)
 
     自旋锁具有一定的缺陷，非公平、线程饥饿、锁标识同步耗费资源，因此产生了队列锁，对多个自旋锁进行管理。
@@ -249,7 +341,7 @@
 
     假设有类 A。
 
-    1. 初始状态的对象 a 为可偏向未偏向状态
+    1. 初始状态的对象 a 为可偏向未偏向状态，[对象头状态参考](https://www.cnblogs.com/makai/p/12466541.html)
 
     2. 当`线程 1` 对对象 a1 加锁后，a1 对象头 markword 状态偏向于`线程 1`，之后`线程 1`加锁时，发现锁偏向于自己，无需 CAS 替换对象头，可直接进入同步块。
     3. `线程 2`想要对对象 a1 加锁，发现 a1 偏向于 `线程 1`，触发锁撤销，此时 a1 的锁升级为轻量级锁。
@@ -584,6 +676,8 @@
 
 - [raft 测验](https://ongardie.net/static/raft/userstudy/quizzes.html)
 
+- [redis sentinel 选举过程](https://blog.csdn.net/xuhao_xuhao/article/details/78885752)
+
 ### BFT
 
 - [PBFT 算法各阶段消息发送数量证明](https://zhuanlan.zhihu.com/p/53897982)
@@ -747,6 +841,26 @@
     热点数据缓存击穿问题，可以使用双缓存（多级缓存）。
     
     并发读取时，第一个线程获取锁成功，负责更新主缓存，后续线程返回副缓存数据。并发写入时，加分布式锁，更新副缓存，更新完毕后删除主缓存。
+
+## Redis
+
+- [Redis内部数据结构详解(](http://zhangtielei.com/posts/server.html)
+
+    - String
+      - OBJ_ENCODING_RAW：也就是 sds，带有 header 的 char 数组
+      - OBJ_ENCODING_INT：即 long，纯数字时使用
+      - OBJ_ENCODING_EMBSTR：非纯数字，长度较短时，尝试使用
+    - Hash
+      - OBJ_ENCODING_HT：也就是 dict
+      - OBJ_ENCODING_ZIPLIST：类似数组，连续空间，但每个元素所占空间可以不同，节省内存
+    - list
+      - quicklist：ziplist 的链表，ziplist 可以被压缩为 quicklistLZF
+    - zset
+      - ziplist：数据较少时
+      - dict+skiplist：
+    - set
+      - intset：元素可以用 64bit 的有符号数表示，且个数较少时
+      - dict：value 为 NULL
 
 # 开源框架
 
@@ -1027,6 +1141,10 @@
 
 - [Kafka 的 push 与 pull 设计](https://blog.csdn.net/my_momo_csdn/article/details/93921625?utm_medium=distribute.pc_relevant.none-task-blog-baidulandingword-1&spm=1001.2101.3001.4242)
 
+- [session.timeout.ms 和 max.poll.interval.ms 和 heartbeat.interval.ms 三个参数的意义](https://www.cnblogs.com/hapjin/archive/2019/06/01/10926882.html)['](https://blog.csdn.net/hanzhen2010/article/details/108484395)
+
+- [Kafka Consumer Poll 模型](https://www.jianshu.com/p/f1254a80436e)
+
 ### 底层原理✨
 
 - [kafka 时间轮设计](https://blog.lovezhy.cc/2020/01/11/Kafka%E6%8C%87%E5%8D%97-%E6%97%B6%E9%97%B4%E8%BD%AE%E5%AE%9E%E7%8E%B0/)
@@ -1087,13 +1205,13 @@
 
         然后，GroupCoordinator 返回 JoinGroupResponse。但，members 字段只有 leader 有数据。
 
-    3. 第三阶段( SYNC GROUP)
+    3. 第三阶段(SYNC GROUP)
 
         消费者组 leader 根据 GroupCoordinator 返回的分区策略完成具体的分区分配后，向 GroupCoordinator 发送 SyncGroupRequest 请求。所有消费者都会发送该请求，GroupCoordinator 将消费者组 leader 发送来的分配方案和消费者组的元数据一起存入 _consumer_offsets 主题中，然后将响应发送给各个消费者。
 
         当消费者收到所属的分配方案之后会调用 PartitionAssignor 中的 `onAssignment()`方法。随后再调用 ConsumerRebalanceListener 中的 `OnPartitionAssigned()` 方法。之后开启心跳任务，消费者定期向服务端的 GroupCoordinator 发送 HeartbeatRequest 来确定彼此在线。
 
-    4. 第四阶段( HEARTBEAT)
+    4. 第四阶段(HEARTBEAT)
 
         正式开始消费前，消费者通过 OffsetFetchRequest 请求获取上次提交的消费位移并从此处继续消费。消费者通过向 GroupCoordinator 发送心跳来维持它们与消费组的从属关系，以及它们对分区的所有权关系。
 
@@ -1122,6 +1240,12 @@
     zab 协议四个阶段 —— 选举，发现，同步，广播。
     
     fle 三个阶段 —— 选举，恢复，广播。
+
+- [curator 客户端使用 Node Cache 监听 zk 数据](https://my.oschina.net/roccn/blog/918458)
+
+    1. 客户端注册监听器，发送事件注册到服务端
+    2. 服务端事件触发后，通知客户端
+    3. NodeCache 针对不同事件，进行处理，例如节点内容变更，便获取节点内容数据，然后触发客户端注册的监听器
 
 ### zab 原理解析
 
@@ -1219,6 +1343,22 @@
 
     1. 对于外部线程提交给 IO 线程的任务，以及 Handler 中业务任务的处理交给业务线程池，都需要通过 inEventLoop() 方法进行判断，减少了上下文切换。
     2. MPSC 队列无锁队列提高性能。
+
+## Sentinel
+
+- [Sentinel 源码解析](https://mp.weixin.qq.com/s/C6ba2NwWrwjeq617Z4Rd2w)
+
+### 底层原理
+
+- [基本概念](https://github.com/alibaba/Sentinel/wiki/Sentinel-%E6%A0%B8%E5%BF%83%E7%B1%BB%E8%A7%A3%E6%9E%90)
+
+    - Node 代表 Sentinel 里面的各种种类的统计节点
+      - defaultnode：每条调用链中的资源都对应一个该类型节点
+      - clusterNode：所有链中相同的资源共同对应一个该类型节点
+      - EntranceNode：对应着每条调用链
+      - StatisticNode：不同来源的资源对应一个该节点
+
+    每一个资源拥有一个 slot 链
 
 # Linux
 
