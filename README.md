@@ -40,20 +40,21 @@
   - [innodb 存储引擎✨](#innodb-存储引擎)
 - [缓存](#缓存)
   - [Redis](#redis)
+    - [底层原理](#底层原理)
 - [开源框架](#开源框架)
   - [Spring](#spring)
     - [源码解析✨](#源码解析)
   - [Dubbo](#dubbo)
   - [Kafka](#kafka)
-    - [底层原理✨](#底层原理)
+    - [底层原理✨](#底层原理-1)
   - [Zookeeper](#zookeeper)
     - [zab 原理解析](#zab-原理解析)
   - [Tomcat](#tomcat)
   - [Netty](#netty)
     - [内存管理](#内存管理)
-    - [底层原理](#底层原理-1)
-  - [Sentinel](#sentinel)
     - [底层原理](#底层原理-2)
+  - [Sentinel](#sentinel)
+    - [底层原理](#底层原理-3)
 - [Linux](#linux)
 - [计算机网络](#计算机网络)
   - [HTTP](#http)
@@ -65,6 +66,7 @@
   - [负载均衡](#负载均衡)
   - [SSO](#sso)
   - [点赞评论计数设计](#点赞评论计数设计)
+  - [订单接口幂等性](#订单接口幂等性)
 - [编程素养](#编程素养)
   - [设计模式](#设计模式)
   - [常用指令](#常用指令)
@@ -475,7 +477,21 @@
 
     这样，最后到CMS remark的时候，当时的card table外加mod-union table就足以记录在并发标记过程中old gen发生的所有引用变化了。
 
+- [CMS为什么采用“标记-清除”算法](https://www.cnblogs.com/jing99/p/6076119.html?utm_source=itdadao&utm_medium=referral)
+
+最后的清除阶段，如果对堆进行压缩，对象引用位置就会移动，就需要暂定 mutator。
+
+对比 G1，CMS 最后清除阶段不能选择部分区域，暂停时间会过长，因此 CMS 选择采用标记-清除算法。
+
+- 标记算法
+
+    从标记算法来看，CMS 通过对象头记录对象已被标记过，G1 通过外部 bitmap 在记录。
+
+    对象头标记无法与写时复制相兼容。
+
 ### G1
+
+- [G1 调优参数](https://blog.csdn.net/qq_27529917/article/details/87072130?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.control)
 
 - [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
 
@@ -706,6 +722,8 @@
 
     2PC 这个分布式事务协议通常是在 DB 层面实现，TCC 则相当于应用层面的 2PC，通过业务逻辑实现，能够允许程序自定义数据库操作粒度。
 
+- [本地消息表实现最终一致性](https://segmentfault.com/a/1190000012415698)
+
 # MySQL 
 
 [数据库三范式与反范式](https://zhuanlan.zhihu.com/p/77771583)
@@ -743,6 +761,8 @@
     sum() 统计时可以添加条件
 
 - [MySQL 组内排序: 分组查询每组的前n条记录](https://www.jianshu.com/p/717c4bdad462)
+
+- [数据库如何保证先查询后插入/更新原子性？](https://www.cnblogs.com/wang-meng/p/11773391.html)
 
 - [optimizer trace 详解](http://blog.itpub.net/28218939/viewspace-2658978/)
 
@@ -861,6 +881,40 @@
     - set
       - intset：元素可以用 64bit 的有符号数表示，且个数较少时
       - dict：value 为 NULL
+
+### 底层原理
+
+- [Redis 写时复制的原理](https://blog.csdn.net/muscleape/article/details/105670481)
+
+- [Redis 主从复制过程](https://mp.weixin.qq.com/s/0VVYTyAI1egfs2Fxcrme3A)['](https://blog.csdn.net/Leon_cx/article/details/81545178?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.control)
+
+    主从同步过程：
+
+  1. 全量复制时，在 bgsave 期间，通过 client-output-buffer-limit slave 256MB 64MB 60，即客户端输出缓冲区缓存 RDB 生成期间的指令。
+  2. 部分复制时，当主从连接暂时断开，master 通过 repl-backlog-buffer，即复制积压缓冲区暂存指令，主从恢复后，补发命令。
+
+    心跳检测：
+    
+    主从节点各自模拟成对方的客户端，定时发送 ping 指令。主节点 10s 一次，监控从节点状态；从节点 1s 一次，上报自己当前的复制偏移量。
+
+- [Redis 持久化](https://mp.weixin.qq.com/s/AzNWyWGz5OfqhNTV9EE-Wg)['](https://blog.csdn.net/Leon_cx/article/details/81545178?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.control&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.control)
+
+  - RDB 快照方式
+    1. 子进程执行快照
+    2. 父进程此时的指令写入 客户端输出缓冲区.子进程快照完成时，替换原有RDB，通知父进程
+    3. 主进程将副本写回主存
+
+  - AOF 增量方式
+
+    1. 指令执行完成后，立刻写入 AOF 缓冲区。
+    2. 根据不同策略，fsync 到硬盘
+
+    bgrewriteaof 重写 AOF 时：
+        
+    1. fork 子进程，读取内存数据，重新生成 AOF 文件
+    2. 主进程无感知，继续写入原来的 AOF 文件
+    3. 主进程同时写入 AOF 重写缓冲区
+    4. 子进程重写 AOF 完成后，主进程接到信号，将 AOF 重写缓冲区数据追加到新的 AOF 文件，然后原子性替换掉旧文件
 
 # 开源框架
 
@@ -993,7 +1047,7 @@
 
     4. 执行 bean 实例化后置处理器, `InstantiationAwareBeanPostProcessor` 的 `postProcessAfterInstantiation()` 方法
     5. 属性值注入前，进行处理`InstantiationAwareBeanPostProcessor` 的 `postProcessPropertyValues()` 方法
-    6. 应用属性值，解析属性值中的 bean 引用, 未加载的去加载
+    6. `applyPropertyValues()`应用属性值，解析属性值中的 bean 引用, 未加载的去加载
     7. 调用 bean 前置处理器, `BeanPostProcessor` 的 `postProcessBeforeInitialization()`
         - 此时会执行 `@PostConstruct`
     8. bean 初始化，若是 InitializingBean, 调用 `afterPropertiesSet()`
@@ -1086,6 +1140,8 @@
 
 - ReferenceAnnotationBeanPostProcessor 继承 AnnotationInjectedBeanPostProcessor<Reference> 完成 Reference 属性注入。
 
+    当前 ReferenceBean 所在的 bean populateBean() 时，调用到身为 InstantiationAwareBeanPostProcessorAdapter 的 AnnotationInjectedBeanPostProcessor 的方法 postProcessPropertyValues()，其中 InjectionMetadata 开始注入，注入时构建ReferenceBean，初始化 ReferenceBean，初始化时，调用 `invoker = refprotocol.refer(interfaceClass, urls.get(0));`得到 invoker，然后 `(T) proxyFactory.getProxy(invoker)` 得到代理，然后赋值给 ReferenceBean 的 ref 属性，ref 也就是 ReferenceBeanInvocationHandler 中的目标对象 bean。于此，用户调用 @Reference 的属性的方法时，请求会调用到 Protocol.refer() 生成的Invoker 的代理类上，真正执行通过 Invoker。而不同协议的 Invoker，主要内容就是通信客户端了。
+
 - ServiceAnnotationBeanPostProcessor 继承 BeanDefinitionRegistryPostProcessor 完成 @Service(指 com.alibaba.dubbo.config.annotation.Service) 注释类的扫描，并将构建对应的 ServiceBean 的 BeanDefinition 注入到 Spring 容器中，当实例化 bean 时，将对 ServiceBean 进行属性注入（比如，ref 属性）。
 
 - [dubbo Filter 之 ContextFilter](https://blog.csdn.net/yuanshangshenghuo/article/details/107722549)
@@ -1102,7 +1158,7 @@
 
     当 bean 实例化时，DubboConfigBindingBeanPostProcessor 的 postProcessBeforeInitialization() 方法匹配到对应的 beanName，然后对 Dubbo 的 AbstractConfig 各个配置类进行对应的赋值，根据属性前缀与 application.properties 中的属性进行绑定。
 
-    populateBean() 时，AbstractAutowireCapableBeanFactory 的 applyPropertyValues() 方法将 serviceBean 中的属性（例如：ref）由 RuntimeReference 转换为真正的代理类。之后，ServiceBean 作为 InitializingBean，在执行 afterPropertiesSet() 方法时，会对内部的其他属性，如：provider、protocol、module等进行赋值，通过在 beanFactory 中根据类型找到对应的 bean。
+    populateBean() 时，AbstractAutowireCapableBeanFactory 的 applyPropertyValues() 方法将 serviceBean 中的属性（例如：ref）由 RuntimeReference 转换为真正的代理类，解析时，通过 BeanDefinitionValueResolver.resolveValueIfNecessary()->resolveReference(Object argName, RuntimeBeanReference ref)->bean = this.beanFactory.getBean(refName) 完成解析。之后，ServiceBean 作为 InitializingBean，在执行 afterPropertiesSet() 方法时，会对内部的其他属性，如：provider、protocol、module等进行赋值，通过在 beanFactory 中根据类型找到对应的 bean。
 
     所有属性设置完毕，待会可以导出服务。
 
@@ -1111,6 +1167,8 @@
     在 bean 实例化过程中，bean 刚实例化，在 populateBean() 之前，执行 applyMergedBeanDefinitionPostProcessors() 时，会对每个 bean 应用 MergedBeanDefinitionPostProcessor 的 postProcessMergedBeanDefinition() 方法，其中 ReferenceAnnotationBeanPostProcessor 会在方法中执行 findInjectionMetadata() 找到调用 InstantiationAwareBeanPostProcessor 的 postProcessPropertyValues() 方法，其中 AnnotationInjectedBeanPostProcessor 的 postProcessPropertyValues() 内部的 findInjectionMetadata() 方法对每个类找到其中带有 @Reference 注释的属性，包装为 dubbo 的 AnnotationInjectedBeanPostProcessor.AnnotatedInjectionMetadata 类型并缓存起来。
 
     populateBean() 时，AnnotationInjectedBeanPostProcessor(实际为 ReferenceAnnotationBeanPostProcessor，属性 annotationType 为 @Reference) 作为 InstantiationAwareBeanPostProcessor，被调用其 postProcessPropertyValues() 方法（针对spring中，该方法在spring5.1以后被替换为 postProcessProperties()），该方法从缓存中得到当前 bean 的需要被注入的属性，执行 AnnotationInjectedBeanPostProcessor 中 AnnotatedFieldElement 的 inject() 方法，getInjectedObject() -> ReferenceAnnotationBeanPostProcessor.doGetInjectedBean() -> buildReferenceBeanIfAbsent(referencedBeanName|ReferenceBean 名称, reference|注释, injectedType|属性类型, getClassLoader()) 得到 ReferenceBean，并将 beanFactory 中的 dubbo 配置类设置到其中。最后，将该 ReferenceBean 生成 InvocationHandler，如果该服务为远端服务，则在此时进行初始化，设置 ReferenceBean 的 ref 属性，然后创建jdk动态代理，注入成功。
+
+    远端服务初始化时，调用 ReferenceConfig.get()，对此进行初始化，根据协议创建对应的 Invoker，然后创建 Proxy 赋值给当前对象的 ref 属性。DubboInvoker 中持有底层通信客户端。
 
 - DubboProtocol refer() 为 DubboInvoker 构建的 ExchangeClient
 
@@ -1475,6 +1533,8 @@
     - 当连接处于Listening状态时，Recv-Q表示全连接队列实际使用情况，Send-Q表示全连接队最大容量。
     - 当连接处于非Listening状态时，Recv-Q表示接受缓冲区还没有读取的数据大小，Send-Q表示发送缓冲区还没有被对端ACK的数据大小。
 
+- [tcp socket的backlog参数](https://www.cnblogs.com/qiumingcheng/p/9492962.html)
+
 - [TCP_NODELAY选项](https://www.jianshu.com/p/ccafdeda0b95)
 
     TCP_NODELAY 关闭时，会开启 [Nagle 算法](https://www.cnblogs.com/postw/p/9710772.html)。
@@ -1534,6 +1594,10 @@
     3. 冷热数据分离
     4. 批量查询
     5. 消息度列去重
+
+## 订单接口幂等性
+
+- [接口的幂等性，如何保证](https://www.cnblogs.com/aspirant/p/11628654.html)
 
 # 编程素养
 
