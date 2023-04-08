@@ -57,8 +57,8 @@
         - [底层原理](#%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86)
 - [Linux](#linux)
 - [计算机网络](#%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C)
-    - [HTTP](#http)
     - [SOCKET](#socket)
+    - [HTTP](#http)
     - [TCP](#tcp)
     - [NIO](#nio)
 - [通信协议](#%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE)
@@ -1490,21 +1490,41 @@
 
     - [功能原因](https://www.zhihu.com/question/21546408/answer/149670503)，IP 地址与地域相关，它虽然具有唯一标识作用，但不能唯一标识某台主机，MAC 地址才能唯一标识某台主机。如果仅有 IP 地址，主机 A IP 换了以后，发往主机 A 的消息不会发往 A 原来的 IP，而是会发送到 A 的 MAC 地址新对应的 IP 地址。所以，IP 用于路由，但无法永久唯一标识。
 
-## HTTP
-
-- [http 版本特性](http://muyiy.cn/question/network/117.html)
-
-    http1.0: 无状态，无连接
-    http1.1: 长连接，管道化请求，缓存控制
-    http2.0: 多路复用，头部压缩，server push，二进制分帧
-
-- [当我们在谈论HTTP队头阻塞时，我们在谈论什么](https://blog.csdn.net/uxiad7442kmy1x86dtm3/article/details/79416171)['](https://blog.csdn.net/m0_37145844/article/details/109280985?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~sobaiduend~default-1-109280985.nonecase&utm_term=tcp%E9%98%9F%E5%A4%B4%E9%98%BB%E5%A1%9E&spm=1000.2123.3001.4430)
-
-   HTTP/2 over TCP 解决了 http request 级别的队头阻塞问题，但应用层协议无法解决 TCP 传输层的对头阻塞问题。
-
-- [TCP/IP, SPDY, WebSocket 三者之间的关系](https://www.zhihu.com/question/20097129/answer/15017791)
-
 ## SOCKET
+
+- `epoll` 底层实现
+
+    进程的数据结构为 `task_struct`, 其中的files指针属性指向一个数组，也就是内核为进程维护的打开文件表。打开文件表中存放的是 `struct file` 结构体，数组的下标则是我们常说的文件描述符 `fd`。
+
+    `struct file`中的 `private_data` 指针指向具体的文件类型结构，比如 `Socket` 对应的 `file` 此处指向的结构为 `stuct socket`。
+
+    `struct file` 中的 `file_operations` 属性定义了文件的操作函数，不同的文件类型，对应的 `file_operations` 是不同的，针对 Socket 文件类型，这里的 `file_operations` 指向 `socket_file_ops`。`file_operations` 代表的是将一切抽象地看做文件后，用户可以对该文件进行什么操作，则此处则提供了一个文件该有的方法。以 `Socket` 为例，这里有读写、close 等。
+
+    `Socket` 作为一个应用层可以使用的结构，它有自己的可操作方法对象，也即是上面文件操作的实现方法。
+
+    更往下，`Socket` 内部依赖的是操作系统内部传输层的 `sock` 结构。
+    
+    每个 `sock` 结构内部包含一个发送队列和一个接受队列，也就是发送缓冲区和接收缓冲区。当网卡接收到网络数据时，网卡通过 DMA 将数据拷贝到环形缓冲区 RingBuffer 中。
+
+    然后触发硬中断，呼叫 CPU 将数据从 RingBuffer 拷贝到内存的 sk_buffer 结构中。然后触发软中断，将 sk_buffer 交由内核协议栈处理，最终处理完成，将数据包放入  `sock` 结构的接受缓冲区中。
+
+    当软中断将 sk_buffer 放到 Socket 的接收队列上时，接着就会调用 `sock` 结构的回调函数(数据就绪回调指针)，该回调函数会从 `sock` 结构的等待队列中唤醒一个等待节点 `wait_queue_t` (这个节点代表的就是进程的fd)。每个节点内也包含了自己的回调函数。
+    
+    对于普通的 `Socket` 读写操作来说，当进程进行 `read` 系统调用读取 `Socket` 的数据，没有数据可读时，进程就会阻塞在当前 `Socket` 上。其中的过程是，内核通过 `task_struct` 结构找到打开文件表，然后定位到目标 `Socket` 的 `struct file` 结构，调用 struct file 中的文件操作函数， read 系统调用对应的是 sock_read_iter。最终的实现是依赖 `sock` 结构中的 `tcp_recvmsg` 函数(目前假定讨论的都是 TCP 协议)。
+
+    `tcp_recvmsg` 函数一看 `sock` 接收队列里没数据，怎么办？构建一个等待节点 `wait_queue_t`，节点内关联一下当前要读取数据的进程fd，以及数据来了唤醒该线程时需要调用的节点自己的回调函数。然后把它插入到 `sock` 结构的等待队列中。
+
+    而假如说是应用不直接操作 `Socket`，而是通过 epoll 来读取数据。此时加入没有数据，进程则阻塞在 `epoll` 的等待队列中。`epoll` 不像 `Socket`，因为它不是 `Socket`，所以它没有发送队列和接收队列，只有 `Socket` 才能发送和接收数据。所以当应用程序创建完 epoll 后，需要手动将想要监听的 `Socket` 注册到 epoll 上。epoll 内部维护了一个 `Socket` 的红黑树，方便检索和增删操作。
+
+    这样，当 `Socket` 接收到数据时，还是触发调用 `sock` 结构的回调函数(数据就绪回调指针)，回调数据从等待队列里唤醒并取出一个等待节点，加入这个节点是 epoll 管理创建的，那么调用该节点的回调函数时，函数内容为，将该就绪的 `Socket` (epoll 内部封装了一层，结构为 `epitem`)，也就是红黑树的节点加入到 epoll 中的就绪队列中。
+
+    这样，epoll 的就绪队列里就只有就绪的 socket 了。
+
+    当用户程序调用 epoll_wait 后，内核首先会查找epoll中的就绪队列是否有IO就绪的 epitem，如果有则将就绪的 socket 信息封装到 epoll_event 返回。如果没有，则将进程阻塞在 epoll 的等待队列里。用户进程进入阻塞状态。
+
+    最后提一点，epoll 是何时将等待节点注册到 `sock` 结构的等待队列中的呢？是在应用程序将感兴趣的 `Socket` 注册到 epoll 时，内核首先为该 `Socket` 创建红黑树节点数据结构 `struct epitem`，并加入到红黑树中。同时，在 Socket 中的等待队列上创建等待节点 `wait_queue_t` 并且注册 epoll 自定义的的等待节点的回调函数 ep_poll_callback，也就是把自己加入到就绪队列的那个函数。
+
+    至此，epoll 的流程走完了。
 
 - [Socket 端口复用](https://bbs.csdn.net/topics/390945826)
 
@@ -1519,6 +1539,20 @@
     一个进程可以与多个套接字关联，两个独立的进程不可以侦听同一端口。
     
     服务器可以使用多个子进程/线程为每个套接字提供服务。操作系统（特别是UNIX）在设计上允许子进程从父进程继承所有文件描述符（FD）。因此，只要进程通过父子关系与A相关联，便可以由更多进程A1，A2..监听进程A侦听的所有套接字。
+
+## HTTP
+
+- [http 版本特性](http://muyiy.cn/question/network/117.html)
+
+    http1.0: 无状态，无连接
+    http1.1: 长连接，管道化请求，缓存控制
+    http2.0: 多路复用，头部压缩，server push，二进制分帧
+
+- [当我们在谈论HTTP队头阻塞时，我们在谈论什么](https://blog.csdn.net/uxiad7442kmy1x86dtm3/article/details/79416171)['](https://blog.csdn.net/m0_37145844/article/details/109280985?utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~sobaiduend~default-1-109280985.nonecase&utm_term=tcp%E9%98%9F%E5%A4%B4%E9%98%BB%E5%A1%9E&spm=1000.2123.3001.4430)
+
+   HTTP/2 over TCP 解决了 http request 级别的队头阻塞问题，但应用层协议无法解决 TCP 传输层的对头阻塞问题。
+
+- [TCP/IP, SPDY, WebSocket 三者之间的关系](https://www.zhihu.com/question/20097129/answer/15017791)
     
 ## TCP
 
