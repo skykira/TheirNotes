@@ -615,6 +615,8 @@
     ```
 ### ZGC
 
+- [从历代GC算法角度刨析ZGC](https://zhuanlan.zhihu.com/p/603800743)
+
 - [ZGC 读屏障过程](https://zhuanlan.zhihu.com/p/43608166)
 
     通过染色指针技术和读屏障，使得用户线程在读对象时能够总是读取到对象最新的引用。
@@ -1492,7 +1494,7 @@
 
 ## SOCKET
 
-- `epoll` 底层实现
+- [`epoll` 底层实现](https://mp.weixin.qq.com/s?__biz=Mzg2MzU3Mjc3Ng==&mid=2247483737&idx=1&sn=7ef3afbb54289c6e839eed724bb8a9d6&chksm=ce77c71ef9004e08e3d164561e3a2708fc210c05408fa41f7fe338d8e85f39c1ad57519b614e&scene=178&cur_album_id=2217816582418956300#rd)
 
     进程的数据结构为 `task_struct`, 其中的files指针属性指向一个数组，也就是内核为进程维护的打开文件表。打开文件表中存放的是 `struct file` 结构体，数组的下标则是我们常说的文件描述符 `fd`。
 
