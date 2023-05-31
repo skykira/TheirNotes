@@ -497,6 +497,8 @@
 
 - [G1 垃圾回收算法原理](https://hllvm-group.iteye.com/group/topic/44381)
 
+    - [深入分析 OpenJDK G1 FullGC 原理
+](https://zhuanlan.zhihu.com/p/607400877)
     - [G1 垃圾回收算法总览](https://www.jianshu.com/p/a3e6a9de7a5d)
 
     - [G1 概念理解](https://blog.csdn.net/coderlius/article/details/79272773)
@@ -616,6 +618,8 @@
 ### ZGC
 
 - [从历代GC算法角度刨析ZGC](https://zhuanlan.zhihu.com/p/603800743)
+
+- [Java最前沿技术——ZGC](https://zhuanlan.zhihu.com/p/364813270)
 
 - [ZGC 读屏障过程](https://zhuanlan.zhihu.com/p/43608166)
 
