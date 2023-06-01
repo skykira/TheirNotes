@@ -641,6 +641,8 @@
 
 - [metaspace 元空间存储内容](https://www.jianshu.com/p/a6f19189ec62)
 
+- [metaspace 内部细节](https://mp.weixin.qq.com/s/EfmPjCaiH1l-7RjuqT5mZA)
+
 - [metaspace 与 DirectByteBuffer 并无关系](https://www.zhihu.com/question/399007267/answer/1260691185)
 
 - [JDK的运行时常量池、字符串常量池、静态常量池储存位置](https://zhuanlan.zhihu.com/p/206852587)['](https://blog.csdn.net/weixin_43232955/article/details/107411378)
