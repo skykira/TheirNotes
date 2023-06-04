@@ -1215,6 +1215,8 @@
 
 ### 底层原理✨
 
+- [kafka时间轮细节](https://blog.csdn.net/ZVAyIVqt0UFji/article/details/106293367)
+
 - [kafka 时间轮设计](https://blog.lovezhy.cc/2020/01/11/Kafka%E6%8C%87%E5%8D%97-%E6%97%B6%E9%97%B4%E8%BD%AE%E5%AE%9E%E7%8E%B0/)
 
     **个人见解**，kafka 时间轮通过 hash 使添加任务的时间复杂度降到 o(1)，同时通过刻度分组，使得延迟队列 delayQueue 的添加速度增快。
