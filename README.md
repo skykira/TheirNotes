@@ -74,6 +74,8 @@
     - [常用调试指令](#%E5%B8%B8%E7%94%A8%E8%B0%83%E8%AF%95%E6%8C%87%E4%BB%A4)
         - [网络相关](#%E7%BD%91%E7%BB%9C%E7%9B%B8%E5%85%B3)
 - [工具包](#%E5%B7%A5%E5%85%B7%E5%8C%85)
+- [React](#react)
+    - [基础知识](#%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86)
 
 <!-- /TOC -->
 
@@ -1412,7 +1414,7 @@
 - 异步串行无锁化
 
     1. 对于外部线程提交给 IO 线程的任务，以及 Handler 中业务任务的处理交给业务线程池，都需要通过 inEventLoop() 方法进行判断，减少了上下文切换。
-    2. MPSC 队列无锁队列提高性能。
+    2. [MPSC 队列](https://mp.weixin.qq.com/s/3WDr4v95LcI5xLptCd6Fcg)无锁队列提高性能。
 
 ## Sentinel
 
@@ -1690,3 +1692,9 @@
 - [红黑树工具](https://rbtree.phpisfuture.com/)
 
 - [Raft 演示工具](https://raft.github.io/)
+
+# React
+
+## 基础知识
+
+- [为什么useState返回值是数组，而不是对象](https://juejin.cn/post/6992562102007234567)
